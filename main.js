@@ -1,73 +1,72 @@
-//environment
-const ENV = require('./lib/.env'),
-Controller = require('./controller'),
-util = require('./util')
-//node dependencies
-const http = require('http'),
-https = require('https'),
-StringDecoder = require('string_decoder').StringDecoder,
-url = require('url'),
-fs = require('fs')
+const expr = require('express')(),
+CONF = require('./lib/.config')
 
-const https_options = {
-	'key': fs.readFileSync('./lib/security/key.pem'),
-	'cert': fs.readFileSync('./lib/security/cert.pem')
+let http = require('http'), https = require('https'),
+fs = require('fs'),
+options = {
+	key: fs.readFileSync('./lib/security/key.pem'),
+	cert: fs.readFileSync('./lib/security/cert.pem'),
+	passphrase: 'ATEC'
 }
 
-const server = ( req, res ) => {
+//express middleware
+let passport = require('passport'),
+morg = require('morgan'),
+sess = require('express-session'),
+shibb = require('passport-uwshib')
 
-	let decoder = new StringDecoder('utf-8'),
-	buffer = ''
-	//parse the url
-	let parsed = url.parse( req.url, true ),
-	path = parsed.pathname,
-	trimmed = path.replace( /^\/+|\/+$/g, '' ),
-	method = req.method.toLowerCase(),
-	headers = req.headers,
-	query_string = parsed.query
+expr.use( require('body-parser').json() ) 
+.use( require('body-parser').urlencoded({ extended: true }) )
+.use( require('cors')() ) 
+.use( passport.initialize() )
+.use( passport.session() )
+.use( require('cookie-parser') )
+.use( morg(CONF.logformat || 'dev') )
+.use( sess({ 
+	secret: fs.readFileSync( './lib/security/sess-secret.txt', 'utf-8' ),
+	cookie: { secret: true } 
+}) )
 
-	req.on( 'data', ( data ) => {
-		buffer += decoder.write( data )
-	})
+//create the Shibboleth strategy
+let shibbstrat = new shibb.Strategy( {
+	entityId: CONF.domain,
+	privateKey: options.key,
+	callbackUrl: '/auth/callback',
+	domain: CONF.domain,
+	acceptedClockSkewMs: 200
+})
+//tell Passport to use it
+passport.use( shibbstrat )
 
-	req.on( 'end', () => {
-		buffer += decoder.end()
-		//put the data in an object
-		let data = {
-			'trimmed': trimmed,
-			'query_string': query_string,
-			'method': method,
-			'headers': headers,
-			'payload': util.parseJSON( buffer )
-		}
-
-		console.log(`data: ${data}`)
-		res.writeHead(200).end()
-		
-		// Controller.go( trimmed, data ).then( ( result ) => {
-		// 	console.log(`index.js: returning this response: ${result.status} ${result.payload}`)
-		// 	res.setHeader('Content-Type', 'application/json')
-		// 	res.writeHead(result.status).end( JSON.stringify(result.payload) )
-		// }).catch( ( result ) => {
-		// 	console.log(`index.js: returning this response: ${result.status} ${result.payload}`)
-		// 	res.writeHead(result.status).end(result.err.message)
-		// })
-	})
-
-},
-
-server_http = http.createServer( ( req, res ) => {
-	server( req, res )
-}),
-
-server_https = https.createServer( ( req, res ) => {
-	server( req, res )
+//serialize and deserialize calls for user sessions
+passport.serializeUser( ( user, done ) => {
+	done( null, user )
 })
 
-server_http.listen( ENV.port_http, () => {
-	console.log(`index.js: HTTP server listening at port ${ ENV.port_http }`)
+passport.deserializeUser( ( user, done ) => {
+	done( null, user )
 })
 
-server_https.listen( ENV.port_https, () => {
-	console.log(`index.js: HTTPS server listening at port ${ ENV.port_https }`)
+expr.get('/auth', passport.authenticate( shibbstrat.name ), shibb.backToUrl() )
+expr.post('/auth/callback', passport.authenticate( shibbstrat.name ), shibb.backToUrl() )
+expr.get( shibb.urls.metadata, shibb.metadataRoute( shibbstrat, options.cert ) )
+
+expr.use( shibb.ensureAuth('/auth') )
+
+//pass the express object to the router
+require('./controller/router')( expr )
+
+//start the https server, passing the options and the express object
+https.createServer( options, expr ).listen( CONF.env.port_https, () => {
+	console.log( `server's running on port ${ CONF.env.port_https }`)
 })
+
+http.createServer( ( req, res ) => {
+	let redirect = `https://${CONF.domain}`
+
+	if( CONF.env.port_https != 443 )
+		redirect += `:${CONF.env.port_https}`
+
+	redirect += req.url
+	res.writeHead( 301, { 'Location': redirect }).end()
+}).listen( CONF.env.port_http )

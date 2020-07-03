@@ -1,0 +1,36 @@
+{
+  "name": "polus-backend",
+  "version": "0.0.1",
+  "description": "backend for PROJECT POLUS",
+  "main": "main.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "morgan": "^1.10.0",
+    "passport": "^0.4.1",
+    "passport-uwshib": "^0.1.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/utdallas-atec/polus-backend.git"
+  },
+  "keywords": [
+    "js",
+    "api"
+  ],
+  "author": "Jer'Maine Jones",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/utdallas-atec/polus-backend/issues"
+  },
+  "homepage": "https://github.com/utdallas-atec/polus-backend#readme"
+}
