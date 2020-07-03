@@ -1,5 +1,8 @@
 {
    "editor.fontFamily": "Fira Code, Menlo, Monaco, 'Courier New', monospace",
    "editor.fontLigatures": true,
-   "editor.tabSize": 3
+   "editor.tabSize": 3,
+   "terminal.integrated.cursorStyle": "underline",
+   "terminal.integrated.enableBell": true,
+   "git.autofetch": true
 }
