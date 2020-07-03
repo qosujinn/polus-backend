@@ -5,8 +5,7 @@ let http = require('http'), https = require('https'),
 fs = require('fs'),
 options = {
 	key: fs.readFileSync('./lib/security/key.pem'),
-	cert: fs.readFileSync('./lib/security/cert.pem'),
-	passphrase: 'ATEC'
+	cert: fs.readFileSync('./lib/security/cert.pem')
 }
 
 //express middleware
@@ -24,7 +23,9 @@ expr.use( require('body-parser').json() )
 .use( morg(CONF.logformat || 'dev') )
 .use( sess({ 
 	secret: fs.readFileSync( './lib/security/sess-secret.txt', 'utf-8' ),
-	cookie: { secret: true } 
+	cookie: { secret: true },
+	resave: false,
+	saveUninitialized: false 
 }) )
 
 //create the Shibboleth strategy
