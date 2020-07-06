@@ -19,6 +19,6 @@ module.exports = {
    },
 
    github: {
-      user: 'utdallas-atec',
+      user: 'utdallas-atec'
    }
 }

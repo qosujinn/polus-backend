@@ -2,7 +2,7 @@
   "name": "polus-backend",
   "version": "0.0.1",
   "description": "backend for PROJECT POLUS",
-  "main": "main.js",
+  "main": "boot.js",
   "directories": {
     "lib": "lib"
   },

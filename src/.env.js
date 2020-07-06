@@ -9,9 +9,8 @@ const envs = {
    },
 
    dev: {
-      domain: 'atecsandbox01.utdallas.edu/polus/dev',
-      port_http: 4010,
-      port_https: 5010,
+      domain: 'atecsandbox01.utdallas.edu/polus',
+      port_https: 4010,
       hash_secret: '!AT#C4Ev3R!',
       key_name: 'dev_key.pem',
       cert_name: 'dev_cert.pem' 
@@ -19,8 +18,7 @@ const envs = {
 
    prod: {
       domain: 'atecsandbox01.utdallas.edu/polus',
-      port_http: 4000,
-      port_https: 5000,
+      port_https: 5010,
       hash_secret: '!AT#C4Ev3R!',
       key_name: 'key.pem',
       cert_name: 'cert.pem'
