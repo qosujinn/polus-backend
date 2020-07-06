@@ -1,7 +1,6 @@
 const expr = require('express')()
 const { Shibboleth } = require('shibboleth'),
-CONF = require('./lib/.config'),
-shibb = new Shibboleth( CONF.shibboleth.url )
+CONF = require('./lib/.config')
 
 let http = require('http'), https = require('https'),
 fs = require('fs'),
