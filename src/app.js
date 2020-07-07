@@ -1,22 +1,22 @@
-const expr = require('express')(),
-CONF = require('./src/.config'),
-controller = require('./controller')
-
+//node modules
 let https = require('https'),
 fs = require('fs')
+
+//include modules
+const CONF = require('./.config'),
+expr = require('express')(),
+controller = require('./controller'),
+lib = require('./lib'),
+helpr = require('./lib/helper')
 
 //express middleware
 expr.use( require('body-parser').json() ) 
 expr.use( require('body-parser').urlencoded({ extended: true }) )
 expr.use( require('cors')() )
 
-
-
 const app = {
    //add necessary objects to the main app object
-   CONF: CONF,
    expr: expr,
-   controller: controller,
 
    /*
     * initialize 
@@ -25,8 +25,8 @@ const app = {
    initialize: () => {
       //get the key and certificate for SSL
       let options = {
-         key: fs.readFileSync(`./lib/security/${CONF.env.key_name}`),
-         cert: fs.readFileSync(`./lib/security/${CONF.env.cert_name}`)
+         key: fs.readFileSync(`./src/lib/security/${CONF.env.key_name}`),
+         cert: fs.readFileSync(`./src/lib/security/${CONF.env.cert_name}`)
       }
       //start the https server, passing the options and the express object
       https.createServer( options, expr ).listen( CONF.env.port_https, () => {
@@ -34,3 +34,5 @@ const app = {
       })
    }
 }
+
+module.exports = app
