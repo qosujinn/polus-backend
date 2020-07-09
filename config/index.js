@@ -3,7 +3,7 @@ module.exports = {
    env: require('./.env'),
 
    shibboleth: {
-      url: 'https://atecsandbox01.utdallas.edu/shibb'
+      url: 'https://atecsandbox01.utdallas.edu/polus/s/shibboleth'
    },
 
    cherwell: {
