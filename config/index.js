@@ -1,3 +1,4 @@
+
 module.exports = {
    env: require('./.env'),
 
@@ -6,7 +7,7 @@ module.exports = {
    },
 
    cherwell: {
-      baseurl: 'http://atec250713.campus.ad.utdallas.edu',
+      baseurl: 'http://atec250713.campus.ad.utdallas.edu/',
       user: 'ATECPortalAPI',
       password: '!AT3C4Ev3R!',
       client_id: 'd5ea9a84-91d0-4092-bbe6-3df973afc526',

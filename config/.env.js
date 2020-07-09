@@ -1,27 +1,28 @@
+
 const envs = {
    localdev: {
       domain: 'localhost',
       port_http: 9000,
       port_https: 9010,
       hash_secret: '!AT#C4Ev3R!',
-      key_name: 'local_key.pem',
-      cert_name: 'local_cert.pem' 
+      key: './config/.security/key/local_key.pem', //file path from root
+      cert: './config/.security/cert/local_cert.pem' 
    },
 
    dev: {
       domain: 'atecsandbox01.utdallas.edu/polus',
       port_https: 4010,
       hash_secret: '!AT#C4Ev3R!',
-      key_name: 'dev_key.pem',
-      cert_name: 'dev_cert.pem' 
+      key: './config/.security/key/dev_key.pem',
+      cert: './config/.security/cert/dev_cert.pem' 
    },   
 
    prod: {
       domain: 'atecsandbox01.utdallas.edu/polus',
       port_https: 5010,
       hash_secret: '!AT#C4Ev3R!',
-      key_name: 'key.pem',
-      cert_name: 'cert.pem'
+      key: './config/.security/key/key.pem',
+      cert: './config/.security/cert/cert.pem'
    }
 }
 
