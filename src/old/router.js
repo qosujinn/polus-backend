@@ -1,4 +1,5 @@
-const fs = require('fs')
+const fs = require('fs'),
+_data = require('../lib/crud')
 // passport = require('passport'),
 // ldap = require('passport-ldapauth'),
 // ldap_admin = process.env.LDAP_ADMIN,
@@ -177,4 +178,20 @@ module.exports = (app, cherwell, forms) => {
 			console.log("service/router.js[GET /catalog/type]: HR Case catalog sent");
 		} else { res.status(500).send("this catalog type does not exist"); }
 	});
+
+	app.post('/create/form', ( req, res ) => {
+		let body = req.body,
+		service = body.service,
+		name = body.name
+		
+		_data.read( name ).then( (e) => {
+			res.status(500).send(e)
+		}).catch( () => {
+			_data.create( service, name, body ).then( () => {
+				res.status(200).send()
+			}).catch( (e) => {
+				res.status(500).send(e)
+			})
+		})
+	})
 }
