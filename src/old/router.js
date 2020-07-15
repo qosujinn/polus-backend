@@ -7,12 +7,17 @@ shibb = new Shibboleth( CONF.shibboleth.url )
 
 module.exports = ( app ) => {
 
-	app.post('/auth', (req, res) => {
+	app.get('/ping', (req, res) => {
+		res.status(200).send()
+	})
+
+	app.get('/auth', (req, res) => {
+		console.log('hit')
 		console.log( req.url )
-		if( shibb.hasShibSessionInfo( req ) ) {
-			res.status(200).end('authenticated!')
+		if( shibb.shouldRedirect( req ) ) {
+			shibb.redirect( req, res )
 		} else {
-			shibb.redirect( req )
+			res.status(500).send('there was an error with shibb auth')
 		}
 	})
 
