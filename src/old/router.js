@@ -1,34 +1,19 @@
-const fs = require('fs'),
-_data = require('../lib/crud')
-// passport = require('passport'),
-// ldap = require('passport-ldapauth'),
-// ldap_admin = process.env.LDAP_ADMIN,
-// ldap_password = process.env.LDAP_PASSWORD
+const CONF = require('../../config')
 
-// options = {
-// 	server: {
-// 		url: 'ldap://campus.ad.utdallas.edu',
-// 		bindDN: `cn={{username}},ou=people,dc=campus,dc=ad,dc=utdallas,dc=edu`,
-// 		bindCredentials: `{{password}}`,
-// 		searchBase: `ou=people,dc=campus,dc=ad,dc=utdallas,dc=edu`,
-// 		searchFilter: `(user={{username}})` //,
-// 		// tlsOptions: {
-// 		// 	ca: [
-// 		// 		fs.readFileSync('')
-// 		// 	]
-// 		// }
-// 	}
-// }
+const { Shibboleth } = require('shibboleth'), 
+fs = require('fs'),
+_data = require('../lib/crud'),
+shibb = new Shibboleth( CONF.shibboleth.url )
 
-// passport.use(new ldap( options ))
+module.exports = ( app ) => {
 
-
-module.exports = (app, cherwell, forms) => {
-
-	app.post('/auth', /*passport.authenticate('ldapauth', {session: false}),*/ (req, res) => {
-		// console.log('request: ', req)
-		// console.log('response: ', res)
-		res.status(200).end()
+	app.post('/auth', (req, res) => {
+		console.log( req.url )
+		if( shibb.hasShibSessionInfo( req ) ) {
+			res.status(200).end('authenticated!')
+		} else {
+			shibb.redirect( req )
+		}
 	})
 
 	/*********
