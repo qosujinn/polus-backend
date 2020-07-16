@@ -8,7 +8,7 @@ shibb = new Shibboleth( CONF.shibboleth.url )
 module.exports = ( app ) => {
 
 	app.get('/ping', (req, res) => {
-		res.status(200).send()
+		res.status(200).send('PINGED!')
 	})
 
 	app.get('/auth', (req, res) => {
@@ -172,15 +172,16 @@ module.exports = ( app ) => {
 	app.post('/create/form', ( req, res ) => {
 		let body = req.body,
 		service = body.service,
+		tenant = body.tenant,
 		name = body.name
 		
-		_data.read( name ).then( (e) => {
-			res.status(500).send(e)
+		_data.read( `forms/${tenant}/${service}`, name ).then( (e) => {
+			res.status(500).send("this form already exists!")
 		}).catch( () => {
-			_data.create( service, name, body ).then( () => {
-				res.status(200).send()
+			_data.create( `forms/${tenant}/${service}`, name, body ).then( () => {
+				res.status(200).send('the form has been uploaded!')
 			}).catch( (e) => {
-				res.status(500).send(e)
+				res.status(500).send("the form wasn't created; it's a problem on the server")
 			})
 		})
 	})

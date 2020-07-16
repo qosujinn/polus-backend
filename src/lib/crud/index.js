@@ -1,5 +1,5 @@
 const { fs, path } = require('../../.helper'),
-basedir = path.join( __dirname, '/../../.data/')
+basedir = path.join( __dirname, '../../../.data/')
 
 module.exports = {
 	//create a file
