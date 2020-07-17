@@ -5,7 +5,7 @@ fs = require('fs'),
 _data = require('../lib/crud'),
 shibb = new Shibboleth( CONF.shibboleth.url )
 
-module.exports = ( app ) => {
+module.exports = ( app, cherwell ) => {
 
 	app.get('/ping', (req, res) => {
 		res.status(200).send('PINGED!')
@@ -169,18 +169,25 @@ module.exports = ( app ) => {
 		} else { res.status(500).send("this catalog type does not exist"); }
 	});
 
-	app.post('/create/form', ( req, res ) => {
+	app.post('/form/create', ( req, res ) => {
+		console.log( req.body )
 		let body = req.body,
 		service = body.service,
 		tenant = body.tenant,
 		name = body.name
 		
+		console.log(`new form submitted\n\n ${service} / ${body.category} / ${body.subcategory}`)
+		console.log('checking for existing file...')
 		_data.read( `forms/${tenant}/${service}`, name ).then( (e) => {
+			console.log('=>> it already exists')
 			res.status(500).send("this form already exists!")
 		}).catch( () => {
+			console.log(`=>> doesn't exist. creating...`)
 			_data.create( `forms/${tenant}/${service}`, name, body ).then( () => {
+				console.log(`==>> form created `)
 				res.status(200).send('the form has been uploaded!')
 			}).catch( (e) => {
+				console.log(`==>> form not created\n${e}`)
 				res.status(500).send("the form wasn't created; it's a problem on the server")
 			})
 		})

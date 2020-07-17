@@ -1,5 +1,5 @@
 {
-    "name": "ConferenceCallSetup",
+    "name": "test_form",
 	"type": "Incident",
 	"title": "Conference Call Setup",
     "details": "Use this form to schedule technical support for conference calls. Please answer all questions before clicking submit.",

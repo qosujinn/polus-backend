@@ -31,7 +31,7 @@ module.exports = class Cherwell {
 		this.base_url = params.base_url;
 		this.tenant = params.tenant;
 		//load the forms
-		glob.sync('./service/forms/*/*.js').forEach((file) => {
+		glob.sync('./src/old/forms/*/*.js').forEach((file) => {
 			let form = require( path.resolve(file) );
 			formHandler.add(form);
 		});

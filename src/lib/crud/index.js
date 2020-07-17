@@ -19,7 +19,7 @@ module.exports = {
 						} else { rej( new Error('error writing to new file') ) }
 					})
 				} else { 
-					rej( new Error("couldn't create file. may already exist" ) )  }
+					rej( new Error( err ) )  }
 			})
 		})
 	},

@@ -18,7 +18,8 @@ const cherwell = new Cherwell({
 });
 
 //include modules
-const https = require('https')
+const https = require('https'),
+http = require('http')
 // controller = require('./controller'),
 // helpr = require('./.helper')
 
@@ -35,11 +36,17 @@ const app = {
       }
       // //initialize the controller
       // controller.init()
-      require('./old/router')( expr )
+      require('./old/router')( expr, cherwell )
       //start the https server, passing the options and the express object
       https.createServer( options, expr ).listen( helpr.CONF.env.port_https, () => {
          console.log( `server's running on port ${ helpr.CONF.env.port_https }` )
       })
+      
+      if( process.env.NODE_ENV == 'localdev' ) {
+         http.createServer( expr ).listen( helpr.CONF.env.port_http , () => {
+            console.log( `server's running on port ${ helpr.CONF.env.port_http }` )
+         })
+      }
    }
 }
 
