@@ -1,7 +1,10 @@
 let request = require('request'),
+fs = require('fs'),
 glob = require('glob'),
 path = require('path');
-const formHandler = require('../forms');
+const formHandler = require('../forms'),
+crud = require('../../lib/crud')
+
 let { TreeNode, Tree } = require('./tree.js');
 
 module.exports = class Cherwell {
@@ -19,6 +22,8 @@ module.exports = class Cherwell {
 	tenant = "";
 	incidentCatalog = {};
 	hrCaseCatalog = {};
+	hrCaseSubcategories = [];
+	incidentSubcategories = [];
 
 	/*********
 	constructor
@@ -31,21 +36,30 @@ module.exports = class Cherwell {
 		this.base_url = params.base_url;
 		this.tenant = params.tenant;
 		//load the forms
-		glob.sync('./src/old/forms/*/*.js').forEach((file) => {
-			let form = require( path.resolve(file) );
-			formHandler.add(form);
+		glob.sync('./src/old/forms/*.json').forEach((file) => {
+			
+			crud.read( file ).then( form => {
+				form = JSON.parse( form )
+				console.log(`file path: ${file}\nform:\n${form}`)
+				formHandler.add(form);
+			})
 		});
-		//request a token
-		this.requestToken().then( () => {
-		 	//get the incident service catalog
-		 	this.getIncidentCatalog().then( catalog => {
-		 		this.incidentCatalog = catalog;
-		 	}).catch( error => { console.log(error); });
-		 	//get the HRCase service
-		 	this.getHRCaseCatalog().then( obj => {
-		 		this.hrCaseCatalog = obj;
-		 	}).catch( error => { console.log(error); });
-		 }).catch( error =>  { console.log(error); });
+
+		this.requestToken().then( expires_in => {
+			console.log("-->> starting refresh timer...")
+			this.tokenRefreshTimer(expires_in)
+			//get the incident service catalog
+			this.getIncidentCatalog().then( catalog => {
+				this.incidentCatalog = catalog;
+			}).catch( error => { console.log(error); });
+			//get the HRCase service
+			this.getHRCaseCatalog().then( obj => {
+				this.hrCaseCatalog = obj;
+			}).catch( error => { console.log(error); });
+
+		}).catch( e => {
+			console.log(e)
+		})
 	}
 
 	/*********
@@ -80,12 +94,11 @@ module.exports = class Cherwell {
 					console.log()
 					this.access_token = body.access_token,
 					this.refresh.token = body.refresh_token,
-					this.refresh.expires_in = (body.expires_in * 1000),
-					
-					this.refreshtimer(this.refresh.expires_in);
+					this.refresh.expires_in = new Date().getTime() + (body.expires_in * 1000)
 
+					console.log(`expires in: ${this.refresh.expires_in}`)
 					console.log('backend/cherwell/index.js[requestToken]: connection estabished; token received.');
-					resolve();
+					resolve( this.refresh.expires_in );
 				}
 				//if not, reject with the error that was sent
 				else {
@@ -98,21 +111,16 @@ module.exports = class Cherwell {
 		});
 	}
 
-	refreshtimer(expiry) {
-		let time = 0
-		while( time <= expiry ) {
-			if( time > expiry ) {
-				this.refreshToken().then( () => {
-					console.log('token refreshed');
-					this.refreshtimer(this.refresh.expires_in);
-				}).catch( err => {
-					console.log("error with the refresh: ", err);
-					this.refreshtimer(5)
-				})
-			} else {
-				time++
-			}	
-		}
+	tokenRefreshTimer(expiry) {
+		let time = expiry - new Date().getTime()
+		setTimeout( () => {
+			this.refreshToken().then( expires_in => {
+				console.log("--->> token refreshed! starting refresh timer (again)...")
+				this.tokenRefreshTimer( expires_in )
+			}).catch( e => {
+				console.log(e)
+			})
+		}, time )
 	}
 
 
@@ -145,18 +153,17 @@ module.exports = class Cherwell {
 		 //make the request
 		 console.log('backend/cherwell/index.js[refreshToken]: requesting token refresh...');
 		 request(options, (err, res, body) => {
-		 	console.log(body);
 		 	body = JSON.parse(body);
 		 	if(res.statusCode == 200) {
 		 		//get the data from the body
 		 		this.access_token = body.access_token,
 		 		this.refresh.token = body.refresh_token,
-		 		this.refresh.expires_in = (body.expires_in * 1000),
+		 		this.refresh.expires_in = new Date().getTime() + (body.expires_in * 1000),
 		 		//set fresh to true
 		 		this.refresh.fresh = true;
 		 		//restart the timer with the new expires_in value
 		 		console.log('backend/cherwell/index.js[refreshToken]: token refresh successful.');
-		 		resolve();
+		 		resolve(this.refresh.expires_in);
 
 		 	} else {
 		 		this.refresh.fresh = false;
@@ -366,7 +373,7 @@ module.exports = class Cherwell {
 		category = params.category,
 		subcategory = params.subcategory;
 		try {
-			if(service in formHandler.forms) {
+			if(typeof(formHandler.forms[service]) == 'object') {
 				//check and see if there's a form
 				let form = formHandler.forms[service].find(form => (form.category == category && form.subcategory == subcategory));
 				//if there is, run the callback with the form
@@ -607,6 +614,8 @@ module.exports = class Cherwell {
 						catalog.add(service.value, 'HRCase');
 						catalog.add(category.value, service.value);
 						catalog.add(subcategory, category.value);
+
+						this.hrCaseSubcategories.push( subcat )
 					});
 
 					console.log(catalog);

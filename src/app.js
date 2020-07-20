@@ -9,14 +9,6 @@ let Cherwell = require('./old/util/cherwell')
 expr.use( require('body-parser').json() );
 expr.use( require('cors')() );
 
-const cherwell = new Cherwell({
-        user: CONFIG.user,
-        password: CONFIG.password,
-        client_id: CONFIG.client_id,
-        base_url: CONFIG.baseurl,
-        tenant: CONFIG.tenant
-});
-
 //include modules
 const https = require('https'),
 http = require('http')
@@ -34,9 +26,18 @@ const app = {
          key: helpr.fs.readFileSync(ENV.key),
          cert: helpr.fs.readFileSync(ENV.cert)
       }
+
+      const cherwell = new Cherwell({
+         user: CONFIG.user,
+         password: CONFIG.password,
+         client_id: CONFIG.client_id,
+         base_url: CONFIG.baseurl,
+         tenant: CONFIG.tenant
+      });
+
+      require('./old/router')( expr, cherwell )
       // //initialize the controller
       // controller.init()
-      require('./old/router')( expr, cherwell )
       //start the https server, passing the options and the express object
       https.createServer( options, expr ).listen( helpr.CONF.env.port_https, () => {
          console.log( `server's running on port ${ helpr.CONF.env.port_https }` )

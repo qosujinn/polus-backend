@@ -1,32 +1,31 @@
-const { fs, path } = require('../../.helper'),
-basedir = path.join( __dirname, '../../../.data/')
+const { fs, path } = require('../../.helper')
 
 module.exports = {
 	//create a file
-	create: async ( dir, file, data ) => {
-		return new Promise( ( rsl, rej ) => {
-			//try to open the file
-			fs.open( `${basedir}${dir}/${file}.json`, 'wx', ( err, filedesc ) => {
-				if( !err && filedesc ) {
-					let string_data = JSON.stringify(data)
-					fs.writeFile( filedesc, string_data, (err) => {
-						if(!err) {
-							fs.close( filedesc, (err) => {
-								if(!err) {
-									rsl(true);
-								} else { rej( new Error('error closing new file') ) }
-							})
-						} else { rej( new Error('error writing to new file') ) }
-					})
-				} else { 
-					rej( new Error( err ) )  }
-			})
-		})
-	},
+	// create: async ( dir, file, data ) => {
+	// 	return new Promise( ( rsl, rej ) => {
+	// 		//try to open the file
+	// 		fs.open( `${basedir}${dir}/${file}.json`, 'wx', ( err, filedesc ) => {
+	// 			if( !err && filedesc ) {
+	// 				let string_data = JSON.stringify(data)
+	// 				fs.writeFile( filedesc, string_data, (err) => {
+	// 					if(!err) {
+	// 						fs.close( filedesc, (err) => {
+	// 							if(!err) {
+	// 								rsl(true);
+	// 							} else { rej( new Error('error closing new file') ) }
+	// 						})
+	// 					} else { rej( new Error('error writing to new file') ) }
+	// 				})
+	// 			} else { 
+	// 				rej( new Error( err ) )  }
+	// 		})
+	// 	})
+	// },
 
-	read: async ( dir, file ) => {
+	read: async ( file ) => {
 		return new Promise( ( rsl, rej ) => {
-			fs.readFile( `${basedir}${dir}/${file}.json`, 'utf-8', ( err, data ) => {
+			fs.readFile( file, 'utf-8', ( err, data ) => {
 				if(err) { 
 					console.log('no file found.')
 					rej(err) 
@@ -35,7 +34,7 @@ module.exports = {
 		})
 	},
 
-	update: async ( dir, file, data) => {
+	update: async ( basedir, dir, file, data) => {
 		return new Promise( ( rsl, rej ) => {
 			//open the file
 			fs.open( `${basedir}${dir}/${file}.json`, 'r+', ( err, filedesc ) => {
@@ -59,7 +58,7 @@ module.exports = {
 		})
 	},
 
-	delete: async ( dir, file ) => {
+	delete: async ( basedir, dir, file ) => {
 		return new Promise( ( rsl, rej) => {
 			fs.unlink( basedir + dir + '/' + file + '.json', (err) => {
 				if(!err) { rsl(true) }

@@ -1,0 +1,35 @@
+{
+	"name": "BusinessExpense",
+	"type": "HRCase",
+	"title": "Laptop Cart Reservation",
+    "details": "Use this form to schedule a laptop cart reservation. Please answer all questions before clicking submit.",
+    "service": "Procurement",
+	"category": "Reimbursements",
+	"subcategory": "Business Expense Reimbursement",
+    "tenant": "ATEC",
+
+	"fields": [
+		{
+			"name": "Priority",
+			"value": "3"
+		},
+		{
+			"name": "CallSource",
+			"value": "Portal"
+		}
+	],
+
+	"queries": [
+		{
+			"type": "text",
+			"text": "Give a short description of your problem:",
+			"fieldName": "ShortDescription"
+		},
+		{
+			"type": "textarea",
+			"text": "Explain your problem in as much detail as possible.",
+			"fieldName": "Description"
+		}
+	]
+
+}
