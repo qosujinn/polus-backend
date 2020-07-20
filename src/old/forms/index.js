@@ -1,4 +1,6 @@
-const fs = require('fs')
+const fs = require('fs'),
+_ = require('lodash');
+const { RSA_SSLV23_PADDING } = require('constants');
 
 const handler = {
 	'forms': { 'defaults': [] },
@@ -25,6 +27,19 @@ const handler = {
 		}
 
 		return this;
+	},
+	'exists': function(obj) {
+		return new Promise( (rsl, rej) => {
+			for( let service in this.forms ) {
+				service.forEach( form => {
+					if( _.isEqual(obj, form) ) {
+						rsl()
+					}
+				})
+			}
+			
+			rej()
+		})
 	}
 }
 

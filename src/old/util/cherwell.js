@@ -25,6 +25,8 @@ module.exports = class Cherwell {
 	hrCaseSubcategories = [];
 	incidentSubcategories = [];
 
+	formHandler = formHandler;
+
 	/*********
 	constructor
 	takes passed-in params and assigns them
@@ -41,7 +43,7 @@ module.exports = class Cherwell {
 			crud.read( file ).then( form => {
 				form = JSON.parse( form )
 				console.log(`file path: ${file}\nform:\n${form}`)
-				formHandler.add(form);
+				this.formHandler.add(form);
 			})
 		});
 
@@ -373,9 +375,9 @@ module.exports = class Cherwell {
 		category = params.category,
 		subcategory = params.subcategory;
 		try {
-			if(typeof(formHandler.forms[service]) == 'object') {
+			if(typeof(this.formHandler.forms[service]) == 'object') {
 				//check and see if there's a form
-				let form = formHandler.forms[service].find(form => (form.category == category && form.subcategory == subcategory));
+				let form = this.formHandler.forms[service].find(form => (form.category == category && form.subcategory == subcategory));
 				//if there is, run the callback with the form
 				if(form) {
 					callback(null, form);
@@ -385,7 +387,7 @@ module.exports = class Cherwell {
 				let result = this.isSubcategory(subcategory);
 
 				if(result.found) {
-					let form = formHandler.forms.defaults.find(form => form.type == result.type);
+					let form = this.formHandler.forms.defaults.find(form => form.type == result.type);
 					if(form) { 
 						//set the classification of the request, and send the form to the callback
 						form.service = service, form.category = category, form.subcategory = subcategory;

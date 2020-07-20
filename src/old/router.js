@@ -1,7 +1,10 @@
 const CONF = require('../../config')
+const { fs, path } = require('../.helper')
+
+let basedir = path.resolve()
+console.log( basedir )
 
 const { Shibboleth } = require('shibboleth'), 
-fs = require('fs'),
 _data = require('../lib/crud'),
 shibb = new Shibboleth( CONF.shibboleth.url )
 
@@ -173,23 +176,33 @@ module.exports = ( app, cherwell ) => {
 		console.log( req.body )
 		let body = req.body,
 		service = body.service,
-		tenant = body.tenant,
+		category = body.category,
+		subcategory = body.subcategory,
 		name = body.name
 		
-		console.log(`new form submitted\n\n ${service} / ${body.category} / ${body.subcategory}`)
+		console.log(`new form submitted\n\n ${service} / ${body.category} / ${body.subcategory}\n`)
 		console.log('checking for existing file...')
-		_data.read( `forms/${tenant}/${service}`, name ).then( (e) => {
-			console.log('=>> it already exists')
-			res.status(500).send("this form already exists!")
-		}).catch( () => {
-			console.log(`=>> doesn't exist. creating...`)
-			_data.create( `forms/${tenant}/${service}`, name, body ).then( () => {
-				console.log(`==>> form created `)
-				res.status(200).send('the form has been uploaded!')
-			}).catch( (e) => {
-				console.log(`==>> form not created\n${e}`)
-				res.status(500).send("the form wasn't created; it's a problem on the server")
+		console.log(name)
+		if( !service || !category || !subcategory ) {
+			res.status(404).send("this form doesn't have categorization")
+		} else {
+			cherwell.getForm({service, category, subcategory}, (err, form) => {
+				//if there's a form, reject this
+				if(form) {
+					console.log('=>> it already exists')
+					res.status(500).send({ message: "this form already exists!" })
+				} else {
+					console.log(`=>> doesn't exist. creating...`)
+					_data.create( name, '/forms', body ).then( () => {
+						console.log(`==>> form created `)
+						cherwell.formHandler.add(body)
+						res.status(200).send({ message: 'the form has been uploaded!' })
+					}).catch( (e) => {
+						console.log(`==>> form not created\n${e}`)
+						res.status(500).send({ message: "the form wasn't created; it's a problem on the server" })
+					})
+				}
 			})
-		})
+		}
 	})
 }
