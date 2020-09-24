@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "bent": "^7.3.7",
+    "colors": "^1.4.0",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "express": "^4.17.1",
@@ -21,7 +22,10 @@
     "request": "^2.88.2",
     "shibboleth": "^0.1.4"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@11ty/eleventy": "^0.11.0",
+    "jsdoc": "^3.6.5"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

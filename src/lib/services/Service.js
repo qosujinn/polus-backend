@@ -1,13 +1,13 @@
 class Service {
-   route
-   #handles = {
+   name
+   #controllers = {
       get: {},
       post: {},
       put: {},
       delete: {}
    }
 
-   constructor(params) {
+   init() {
       return this
    }
 

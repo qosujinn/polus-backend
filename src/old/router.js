@@ -29,6 +29,7 @@ module.exports = ( app, cherwell ) => {
 	* gets the form for the category requested
 	**********/
 	app.get('/form/:service/:category/:subcategory', (req, res) => {
+		console.log(req.params)
 		//search the catalogs for the subcategory
 		let service = req.params.service,
 		category = req.params.category,
@@ -204,5 +205,34 @@ module.exports = ( app, cherwell ) => {
 				}
 			})
 		}
+	})
+
+	app.post('/s/cherwell/search', (req, res) => {
+		console.log('received. sending...')
+		let body = req.body
+		console.log(`body: ${body}`)
+		cherwell.search( body.busObId, { fields: body.fields, filters: body.filters, pageSize: body.pageSize }).then( result => {
+			res.status(200).send(result)
+		}).catch( e => {
+			console.log(e)
+			res.status(500).send(e)
+		})
+	})
+
+	app.get('/s/cherwell/tickets/:id', (req, res) => {
+		console.log('hit')
+		cherwell.getTicket( req.query.obj, req.params.id ).then( ticket => {
+			console.log(ticket)
+			cherwell.getRelatedObjects( ticket.cherwell.recId, { displayName: 'Incident Owns Journals' } )
+			.then( objs => {
+				ticket.journals = objs
+				res.status(200).send(ticket)
+			}).catch( e => {
+				console.log(e)
+				res.status(500).send(e) 
+			})
+		}).catch( e => {
+			res.status(500).send(e)
+		})
 	})
 }

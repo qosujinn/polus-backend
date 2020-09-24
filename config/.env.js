@@ -1,7 +1,7 @@
 
 const envs = {
    localdev: {
-      domain: 'localhost',
+      domain: 'http://localhost:9000',
       port_http: 9000,
       port_https: 9010,
       hash_secret: '!AT#C4Ev3R!',
@@ -10,7 +10,7 @@ const envs = {
    },
 
    dev: {
-      domain: 'atecsandbox01.utdallas.edu/polus',
+      domain: 'https://atecsandbox01.utdallas.edu/polus',
       port_https: 4010,
       hash_secret: '!AT#C4Ev3R!',
       key: './config/.security/key/dev_key.pem',
@@ -18,7 +18,7 @@ const envs = {
    },   
 
    prod: {
-      domain: 'atecsandbox01.utdallas.edu/polus',
+      domain: 'https://atecsandbox01.utdallas.edu/polus',
       port_https: 5010,
       hash_secret: '!AT#C4Ev3R!',
       key: './config/.security/key/key.pem',

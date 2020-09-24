@@ -1,26 +1,21 @@
-const { glob, path } = require('../.helper')
+const { glob, path, colors } = require('../.helper')
 
-module.exports = {
-   services: glob.sync('./src/lib/services/**/index.js', ( er, files ) => {
-      let lib, services = []
-      console.log(files)
-      if( files ) {
-         files.forEach(( file ) => {
-            lib = require( path.resolve(file) )()
-            if( !lib ) { console.error( `service ${name} did not initialize`) }
-            services.push( { name: file, lib: require( path.resolve(file) ) } )
-         })
-      }
-      return services
-   }),
+module.exports = async function() {
 
-   events: glob.sync('./src/lib/services/**/lib/events/index.js', ( er, files ) => {
-      let events = []
-      if( files ) {
-         files.forEach(( file ) => {
-            events.push( { name: file, lib: require( path.resolve(file) ) } )
-         })
+   let obj = {}
+
+   console.log('\n[boot/lib] initializing libraries...')
+   let files = glob.sync('./src/lib/services/**/index.js')
+   while( files.length != 0 ) {
+      let file = files.pop()
+      let service = require( path.resolve(file) )
+      if( service ) {
+         //initialize the service to get its name and handler 
+         let lib = await service()
+         if( lib ) {
+            obj[lib.name] = lib.handler
+         }
       }
-      return events
-   })
+   }
+   return obj
 }
