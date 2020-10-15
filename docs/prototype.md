@@ -27,25 +27,17 @@ The next phase of the prototype focused on ticketing experience functionality. C
 
 Cherwell tickets and tasks are populated in list view. The sidebar's buttons will filter the widgets on the dashboard.
 
-![dashboard](images/prototype/dashboard-new.png)
-![dashboard-mobile](images/prototype/dashboard-mobile.png)
+![dashboard-mobile](images/prototype/dashboard.png)
 
 ### Tickets
 
 Clicking on a listing in the ticket widget on a dashboard, or navigating to the ticket if you know the ticket number, gives a view of the ticket and its info, from the latest email from the end-user to any tasks that may be associated with the ticket.
 
 ![ticket](images/prototype/ticket.png)
-<<<<<<< HEAD
-![ticket](images/prototype/ticket-mobile.png)
-=======
->>>>>>> dev
+
 
 ### Tasks
 
 Tasks work in the same way, showing the details of a task.
-
-<<<<<<< HEAD
-![task](images/prototype/tasks.png)
-=======
 ![task](images/prototype/task.png)
->>>>>>> dev
+
