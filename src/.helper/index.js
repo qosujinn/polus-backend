@@ -31,6 +31,7 @@ module.exports = {
    request uses bent, an http client, for making requests
    https://github.com/mikeal/bent
    */
+   _request: require('request'),
    request: require('./request'),
    
 
@@ -40,13 +41,18 @@ module.exports = {
    www-form-urlencoded data
    https://github.com/iambumblehead/form-urlencoded
    */
-   urlencode: require('form-urlencoded'),
+   urlencode: require('form-urlencoded').default,
 
    /*
    glob is used to match files with shell syntax. we use it for
    reading in files from local storage
    https://github.com/mikeal/bent
    */
-   glob: require('glob')
+   glob: require('glob'),
+
+   /**
+    * colors lets you add color to console printouts
+    */
+   colors: require('colors')
    
 }

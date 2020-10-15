@@ -1,53 +1,43 @@
 
-const expr = require('express')(),
-CONFIG = require('./.helper').CONF.cherwell,
-ENV = require('./.helper').CONF.env,
-helpr = require('./.helper')
 
-let Cherwell = require('./old/util/cherwell')
-
-expr.use( require('body-parser').json() );
-expr.use( require('cors')() );
-
-//include modules
-const https = require('https'),
+const ENV = require('./.helper').CONF.env,
+helpr = require('./.helper'),
+https = require('https'),
 http = require('http')
-// controller = require('./controller'),
-// helpr = require('./.helper')
+
+const router = require('./router'),
+      controller = require('./controller'),
+      lib = require('./lib')
+
+//get the key and certificate for SSL
+let options = {
+   key: helpr.fs.readFileSync(ENV.key),
+   cert: helpr.fs.readFileSync(ENV.cert)
+}
 
 const app = {
    /*
     * initialize 
     * starts up the server and any other initilization needed
     */
-   initialize: () => {
-      //get the key and certificate for SSL
-      let options = {
-         key: helpr.fs.readFileSync(ENV.key),
-         cert: helpr.fs.readFileSync(ENV.cert)
-      }
+   initialize: async () => {
+      let services = await lib()
 
-      const cherwell = new Cherwell({
-         user: CONFIG.user,
-         password: CONFIG.password,
-         client_id: CONFIG.client_id,
-         base_url: CONFIG.baseurl,
-         tenant: CONFIG.tenant
-      });
+      controller( router, services ).then( () => {
+         
+         //start the https server, passing the options and the express object
+         https.createServer( options, router ).listen( ENV.port_https, () => {
+            console.log(`\nhttps server's running on port ${ ENV.port_https }`)
 
-      require('./old/router')( expr, cherwell )
-      // //initialize the controller
-      // controller.init()
-      //start the https server, passing the options and the express object
-      https.createServer( options, expr ).listen( helpr.CONF.env.port_https, () => {
-         console.log( `server's running on port ${ helpr.CONF.env.port_https }` )
-      })
-      
-      if( process.env.NODE_ENV == 'localdev' ) {
-         http.createServer( expr ).listen( helpr.CONF.env.port_http , () => {
-            console.log( `server's running on port ${ helpr.CONF.env.port_http }` )
          })
-      }
+         //if running locally, start up the http server
+         if( process.env.NODE_ENV == 'localdev' ) {
+            http.createServer( router ).listen( ENV.port_http , () => {
+               console.log(`http server's running on port ${ ENV.port_http }`)
+            })
+         }
+
+      })
    }
 }
 

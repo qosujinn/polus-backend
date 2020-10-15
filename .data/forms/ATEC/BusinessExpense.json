@@ -1,7 +1,7 @@
 {
 	"name": "BusinessExpense",
 	"type": "HRCase",
-	"title": "Laptop Cart Reservation",
+	"title": "Business Expense Reimbursement",
     "details": "Use this form to schedule a laptop cart reservation. Please answer all questions before clicking submit.",
     "service": "Procurement",
 	"category": "Reimbursements",

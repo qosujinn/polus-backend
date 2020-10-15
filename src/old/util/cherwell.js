@@ -5,7 +5,13 @@ path = require('path');
 const formHandler = require('../forms'),
 crud = require('../../lib/crud')
 
+const ticket = require('../../lib/models/ticket')
+
 let { TreeNode, Tree } = require('./tree.js');
+
+const IDS = {
+	incident: "6dd53665c0c24cab86870a21cf6434ae"
+}
 
 module.exports = class Cherwell {
 	access_token = '';
@@ -682,6 +688,195 @@ module.exports = class Cherwell {
 				} else {
 					resolve();
 				}
+			})
+		})
+	}
+
+	async search( id, options ) {
+		return new Promise ( (rsl, rej) => {
+			console.log(options)
+			let req_options = {
+				url: `${this.base_url}/CherwellAPI/api/V1/getsearchresults`,
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				auth: {
+					bearer: this.access_token
+				},
+				form: { 
+				  "busObId": id,
+				  "fields": options.fields,
+				  "filters": options.filters,
+				  "pageSize": options.pageSize || 200,
+				  "includeAll": !options.fields.length
+				}
+			}
+
+			request( req_options, (err, res, body) => {
+				body = JSON.parse(body)
+				if(res.statusCode != 200) {
+					let msg = body.Message ? body.Message : body.errorMessage;
+					console.log('backend/cherwell/index.js[search]: there was an error.');
+					console.log('error: ', err);
+					console.log('body: ', body);
+
+					rej({ status: res.statusCode, errorCode: body.errorCode, message: msg });
+				} else {
+					console.log(`search result: ${body}`)
+					rsl(body);
+				}
+			})
+		})
+	}
+
+	async getTicket( objname, ticketid ) {
+		return new Promise( (rsl, rej) => {
+			
+			let req_options = {
+				url: `${this.base_url}/CherwellAPI/api/V1/getbusinessobject/busobid/${IDS[objname]}/publicid/${ticketid}`,
+				method: 'GET',
+				auth: {
+					bearer: this.access_token
+				}
+			}
+			console.log( req_options )
+			request( req_options, (err, res, body) => {
+				body = JSON.parse(body)
+				console.log(body)
+				if(res.statusCode != 200) {
+					rej()
+				} else {
+					let data = {},
+					fields = body.fields
+
+					data.pubId = body.busObPublicId
+					data.recId = body.busObRecId
+
+					let field = fields.find( f => f.displayName == 'Tenant' )
+					data.tenant = field.value
+
+					field = fields.find( f => f.displayName == "Description")
+					data.description = {
+						text: field.value,
+						html: field.html
+					}
+
+					field = fields.find( f => f.displayName == "Created Date Time")
+					data.dated = field.value
+
+					field = fields.find( f => f.displayName == 'Short Description' )
+					data.subject = field.value
+
+					field = fields.find( f => f.displayName == 'Customer Display Name' )
+					data.requestor = field.value
+
+					field = fields.find( f => f.displayName == "Owned By Team")
+					data.team = field.value
+
+					field = fields.find( f => f.displayName == "NetID")
+					data.netid = field.value
+
+					field = fields.find( f => f.displayName == "Owned By")
+					data.owner = field.value
+
+					field = fields.find( f => f.displayName == "Priority" )
+					data.priority = field.value
+
+					console.log(data)
+
+					let new_ticket = ticket({
+						cherwell: {
+							pubId: data.pubId,
+							recId: data.recId
+						},
+						dated: data.dated,
+						tenant: data.tenant,
+						team: data.team,
+						subject: data.subject,
+						description: data.description,
+						info: {
+							owner: data.owner,
+							requestor: data.requestor || data.netid,
+							priority: data.priority
+						},
+						priority: data.priority
+					})
+
+					rsl(new_ticket) 
+				}
+			})
+		})
+	}
+
+	async getObjectSchema( busObId, include ) {
+		return new Promise( (rsl, rej) => {
+			
+			let req_options = {
+				url: `${this.base_url}/CherwellAPI/api/V1/getbusinessobjectschema/busobid/${busObId}?includerelationships=${include}`,
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				auth: {
+					bearer: this.access_token
+				}
+			}
+
+			request( req_options, (err, res, body) => {
+				body = JSON.parse(body)
+				if(res.statusCode != 200) {
+					let msg = body.Message ? body.Message : body.errorMessage;
+					console.log('backend/cherwell/index.js[getSchema]: there was an error.');
+					console.log('error: ', err);
+					console.log('body: ', body);
+
+					rej({ status: res.statusCode, errorCode: body.errorCode, message: msg });
+				} else {
+					console.log(`search result: ${body}`)
+					rsl(body);
+				}
+			})
+
+
+		})
+	}
+
+	async getRelatedObjects( busObRecId, options, busObId = IDS['incident'] ) {
+		return new Promise( (rsl, rej) => {
+			this.getObjectSchema(busObId, true).then( schema => {
+				let relation = schema['relationships'].find( rel => rel['displayName'] == options['displayName'] )
+				console.log(`got a relation: ${options['displayName']} ${relation['relationshipId']}`)
+
+				let req_options = {
+					url: `${this.base_url}/CherwellAPI/api/V1/getrelatedbusinessobject`,
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					auth: {
+						bearer: this.access_token
+					},
+					form: {
+						parentBusObId: busObId,
+						parentBusObRecId: busObRecId,
+						relationshipId: relation.relationshipId,
+						filters: options.filters,
+						fieldsList: options.fields
+					}
+				}
+
+				request( req_options, (err, res, body) => {
+					body = JSON.parse(body)
+					if(res.statusCode != 200) {
+						let msg = body.Message ? body.Message : body.errorMessage;
+						console.log('error: ', err);
+						console.log('body: ', body);
+	
+						rej({ status: res.statusCode, errorCode: body.errorCode, message: msg });
+					} else {
+						rsl(body['relatedBusinessObjects']);
+					}
+				})
 			})
 		})
 	}

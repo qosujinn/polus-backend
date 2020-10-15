@@ -35,10 +35,17 @@ Cherwell tickets and tasks are populated in list view. The sidebar's buttons wil
 Clicking on a listing in the ticket widget on a dashboard, or navigating to the ticket if you know the ticket number, gives a view of the ticket and its info, from the latest email from the end-user to any tasks that may be associated with the ticket.
 
 ![ticket](images/prototype/ticket.png)
+<<<<<<< HEAD
 ![ticket](images/prototype/ticket-mobile.png)
+=======
+>>>>>>> dev
 
 ### Tasks
 
 Tasks work in the same way, showing the details of a task.
 
+<<<<<<< HEAD
 ![task](images/prototype/tasks.png)
+=======
+![task](images/prototype/task.png)
+>>>>>>> dev
