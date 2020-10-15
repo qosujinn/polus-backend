@@ -1,6 +1,24 @@
+/**
+ * Task model
+ * a task contains information primarily from Cherwell. All primary identifying information, such as Task IDs or
+ * owner and creator info, originates there.
+ * @module model/task
+ */
+
+
 module.exports = ( id ) => ({
+    /**
+    * @member id
+    * public ID of the task
+    */
    id,
    
+   /**
+    * @function set
+    * sets new members to the task, in the key:value pair passed in the object
+    * @param obj - object of keys and values
+    * @return {this} the instance of the task
+    */
    set(obj) {
       try {
          let fields = Object.keys(obj)
@@ -13,6 +31,13 @@ module.exports = ( id ) => ({
       return this
    },
    
+   /**
+    * @function parse
+    * parses the data by service
+    * @param service - the name of the service
+    * @param data - the data to be parsed
+    * @return {this} the instance of the task
+    */
    parse( service, data ) {
       try {
          switch( service ) {
@@ -30,6 +55,16 @@ module.exports = ( id ) => ({
    }
 })
 
+/**
+ * UTILITY FUNCTIONS
+ */
+
+/**
+ * @function parseCherwell
+ * parses the Cherwell data, then sets it to the task
+ * @param data - the data to be parsed
+ * @param task - the instance of the task 
+ */
 function parseCherwell( data, task ) {
    
    let parsed = {

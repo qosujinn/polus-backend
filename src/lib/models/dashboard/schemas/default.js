@@ -1,10 +1,40 @@
+/**
+ * Default dashboard schema
+ * @module model/dashboard/default
+ */
+
 let name = 'default',
+
+/**
+ * @function schema
+ * @param {object} options - any necessary options for widget data
+ * 
+ * @member {object} data
+ * holds the data for the dashboard
+ *  + @member {array} tickets @memberof data - array of tickets for the ticket widget
+ *  + @member {array} tasks @memberof data - array of tasks for the tasks widget
+ * 
+ */
 schema = ( options ) => ({
    data: {
    tickets: null,
    tasks: null
    },
+  
    widget: {
+      /**
+      * Tickets widget
+      * @typedef {Object} widget.tickets
+      * 
+      * @member {object} hrcase @memberof widget.tickets
+      * @member filters @memberof hrcase - filters used for the ticket search
+      * @member fields @memberof hrcase - fields displayed in the ticket grid. These are the field IDs for the business object in Cherwell.
+      * 
+      * @member {object} incident @memberof widget.tickets
+      * @member filters @memberof incident - filters used for the ticket search
+      * @member fields @memberof incident - fields displayed in the ticket grid. These are the field IDs for the business object in Cherwell.
+      * 
+      */
       tickets: {
          'hrcase': {
             filters: [
@@ -26,7 +56,6 @@ schema = ( options ) => ({
                '941ebe38ab9db10318ae2b40bb90e55ddf26dfd2c3'  //OwnedBy
             ]
          },
-
          'incident': { 
             filters: [
                {
@@ -53,7 +82,13 @@ schema = ( options ) => ({
             ]
          } 
       },
-
+      /**
+       * Tasks widget
+       * @typedef {Object} widget.tasks
+       * @member filters @memberof widget.tasks - filters used for the task search
+       * @member fields @memberof widget.tasks - fields displayed in the task grid. These are the field IDs for the business object in Cherwell.
+       * 
+       */
       tasks: {
          filters: [
             {
@@ -76,7 +111,13 @@ schema = ( options ) => ({
          ]
       }
    },
-
+    /**
+    * Views widget
+    * @typedef {Object} widget.views
+    * @member My Items @memberof widget.views - filters the widgets by current user
+    * @member Team Items @memberof widget.views - filters the widgets by current user's team
+    * 
+    */
    views: {
       'My Items'( value ) {
          let filtered = { tickets, tasks }

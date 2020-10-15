@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: services/cherwell/handler.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: services/cherwell/handler.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * handler for the Cherwell module
+ * @module cherwell/handler
+ * @requires module:cherwell/object
+ */
+
+const object = require('./lib/object')
+
+/**
+ * ROUTES
+ */
+let routes = {
+   /**
+    * /:object 
+    */
+   '/:object': {
+      /**
+       * @function get
+       * GET method for the /:object route
+       * makes a search for the object passing the name parameter and the request body.
+       * 
+       * @param req - the request object
+       * @param res - the response object
+       */
+      get: async ( req, res ) => {
+         let name = req.params.object.toLowerCase(),
+         result = await object.search( name, req.body )
+         if( !result ) res.status(500).send()
+         else {
+            let objects = result['businessObjects']
+            res.status(200).send( objects )
+         }
+      },
+
+      /**
+       * @function post
+       * POST method for the /:object route
+       * creates an object.
+       * 
+       * @param req - the request object
+       * @param res - the response object
+       */
+      post: async ( req, res ) => {
+         let name = req.params.object.toLowerCase(),
+         result = await object.create( name, res.body )
+         if( !success ) res.status(500).send()
+         else res.status(200).send()
+         
+      }
+   },
+   
+   /**
+    * /:object/:id
+    */
+   '/:object/:id': {
+      /**
+       * @function get
+       * GET method for the /:object/:id route
+       * gets an object by its name and ID
+       * 
+       * @param req - the request object
+       * @param res - the response object
+       */
+      get: async ( req, res ) => {
+         console.log('[cherwell/handler] hit')
+         let id = req.params.id,
+         name = req.params.object.toLowerCase()
+
+         let data = await object.get( id, name )
+            if ( data ) {
+               res.status(200).send({ statusCode: 200, data: data })
+            } else {
+               res.status(404).send({ statusCode: 404 })
+            }
+      },
+
+      /**
+       * @function post
+       * POST method for the /:object/:id route
+       * updates an object.
+       * 
+       * @param req - the request object
+       * @param res - the response object
+       */
+      post: async ( req, res ) => {
+         let result = await object.update( res.body )
+         res.status(200).send()
+      } 
+   },
+
+   /**
+    * /:object/recId/:recId
+    */
+   '/:object/recId/:recId': {
+      /**
+       * @function get
+       * GET method for the /:object/recId/:recId route
+       * gets an object by its name and record ID
+       * 
+       * @param req - the request object
+       * @param res - the response object
+       */
+      get: async( req, res ) => {
+         let recId = req.params.recId,
+         name = req.params.object
+
+         let data = await object.getByRecId( recId, name )
+         if( !data ) { res.status(200).send() }
+         else {
+            res.status(200).send(data)
+         }         
+      }
+   },
+
+   /**
+    * /:object/recId/email
+    */
+   '/:object/:recId/email': {
+      /**
+       * @function get
+       * GET method for the /:object/:recId/email route
+       * gets the latest email for a record
+       * 
+       * @param req - the request object
+       * @param res - the response object
+       */
+      get: async ( req, res ) => {
+         let recId = req.params.recId,
+         name = req.params.object.toLowerCase()
+         
+         let email = await object.getLatestEmail( recId, name )
+         if( !email ) {
+            console.log('no email')
+            res.status(404).send({ statusCode: 404 })
+         } else {
+            res.status(200).send( { statusCode: 200, email:  email })
+         }
+      }
+   },
+
+   /**
+    * /:object/:recId/related/relation
+    */
+   '/:object/:recId/related/:relation': {
+      /**
+       * @function get
+       * GET method for the /:object/:recId/:related/:relation route
+       * gets an object's related business objects
+       * 
+       * @param req - the request object
+       * @param res - the response object
+       */
+      get:  async ( req, res ) => {  
+         let recId = req.params.recId,
+         name = req.params.object.toLowerCase(),
+         relation = req.params.relation
+
+         object.getRelated( recId, name, { displayName: relation } )
+         .then( objs => {
+            res.status(200).send(objs)
+         }).catch( e => {
+            console.log(e)
+            res.status(200).send()
+         })
+      }
+   },
+
+   /**
+    * /search
+    */
+   '/search': { 
+      /**
+       * @function get
+       * GET method for the /search route
+       * executes a business object search
+       * 
+       * @param req - the request object
+       * @param res - the response object
+       */
+      get: async ( req, res ) => {
+         console.log(req.body)
+         res.status(200).send()
+      }
+   }
+}
+
+/**
+ * EVENTS
+ */
+let events = {
+
+   '/ping': async ( req, res ) => {
+      console.log(req.body)
+      res.status(200).send()
+   }
+}
+
+/**
+ * COMMANDS
+ */
+let commands = {}
+
+module.exports = { routes, events, commands }</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-cherwell.html">cherwell</a></li><li><a href="module-cherwell_handler.html">cherwell/handler</a></li><li><a href="module-cherwell_object.html">cherwell/object</a></li><li><a href="module-crud.html">crud</a></li><li><a href="module-model.html">model</a></li><li><a href="module-model_dashboard.html">model/dashboard</a></li><li><a href="module-model_dashboard_default.html">model/dashboard/default</a></li><li><a href="module-model_form.html">model/form</a></li><li><a href="module-model_task.html">model/task</a></li><li><a href="module-model_ticket.html">model/ticket</a></li><li><a href="module-ui.html">ui</a></li><li><a href="module-ui_dashboard.html">ui/dashboard</a></li></ul><h3>Global</h3><ul><li><a href="global.html#expect">expect</a></li><li><a href="global.html#it">it</a></li><li><a href="global.html#test">test</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Thu Oct 15 2020 10:09:40 GMT-0500 (Central Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

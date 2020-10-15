@@ -27,6 +27,7 @@
     "jsdoc": "^3.6.5"
   },
   "scripts": {
+    "docs": "jsdoc -r src -d docs/code",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -42,5 +43,10 @@
   "bugs": {
     "url": "https://github.com/utdallas-atec/polus-backend/issues"
   },
-  "homepage": "https://github.com/utdallas-atec/polus-backend#readme"
+  "homepage": "https://github.com/utdallas-atec/polus-backend#readme",
+  "nodemonConfig": {
+    "ignore": [
+      "docs/*"
+    ]
+  }
 }

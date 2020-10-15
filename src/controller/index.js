@@ -4,7 +4,7 @@ command = require('./command')
 
 module.exports = ( router, lib ) => {
    return new Promise( (rsl, rej) => {
-      console.log('\n[boot/controller] creating controllers...')
+      console.log('\n[boot/controller] creating controllers...'.yellow)
       //get the list of services
       let services = Object.keys(lib)
       //loop through the list and add them to the controllers

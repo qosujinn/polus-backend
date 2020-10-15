@@ -1,3 +1,10 @@
+/**
+ * module for the CRUD service
+ * Create, Read, Update, Delete on the filesystem
+ * @module crud
+ */
+
+
 const { fs, path } = require('../../.helper'),
 basedir = path.join(__dirname, '/../../old')
 
@@ -10,7 +17,7 @@ module.exports = {
 				if( !err && filedesc ) {
 					let string_data = JSON.stringify(data)
 					fs.writeFile( filedesc, string_data, (err) => {
-						if(!err) {
+						if(!err) { 
 							fs.close( filedesc, (err) => {
 								if(!err) {
 									rsl(true);

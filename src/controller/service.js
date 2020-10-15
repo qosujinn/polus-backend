@@ -5,7 +5,7 @@ let handler = {
       if( service in this.services ) {
          throw new Error(`[controller/service.handler.add] don't know how but this exists already!`)
       }
-
+     
       this.services[service] = handlers
       console.log(`-->> ${service.green} added to service controller`)
       return this

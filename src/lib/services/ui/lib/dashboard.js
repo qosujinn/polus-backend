@@ -1,3 +1,12 @@
+/**
+ * Module for the dashboard UI
+ * @module ui/dashboard
+ * @requires module:helper.request
+ * @requires module:model/dashboard
+ * @requires module:model/ticket
+ * @requires module:model/task
+ */
+
 const ENV = require('../../.helper').CONF.env
 
 let { request } = require('../../.helper')

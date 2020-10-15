@@ -1,6 +1,26 @@
+/**
+ * Ticket model
+ * a ticket contains information primarily from Cherwell. All primary identifying information, such as Ticket IDs or
+ * customer info, originates there.
+ * @module model/ticket
+ */
+
+/**
+ * Exported factory method for the ticket model
+ */
 module.exports = ( id ) => ({
+   /**
+    * @member id
+    * public ID of the ticket
+    */
    id,
    
+   /**
+    * @function set
+    * @summary sets new members to the ticket, in the key:value pair passed in the object
+    * @param obj - object of keys and values
+    * @return {this} the instance of the ticket
+    */
    set(obj) {
       try {
          let fields = Object.keys(obj)
@@ -13,6 +33,13 @@ module.exports = ( id ) => ({
       return this
    },
    
+   /**
+    * @function parse
+    * @summary parses the data by service
+    * @param service - the name of the service
+    * @param data - the data to be parsed
+    * @return {this} the instance of the ticket
+    */
    parse( service, data ) {
       try {
          switch( service ) {
@@ -30,6 +57,16 @@ module.exports = ( id ) => ({
    }
 })
 
+/**
+ * UTILITY FUNCTIONS
+ */
+
+/**
+ * @function parseCherwell
+ * @summary parses the Cherwell data, then sets it to the ticket
+ * @param data - the data to be parsed
+ * @param ticket - the instance of the ticket 
+ */
 function parseCherwell( data, ticket ) {
    
    let parsed = {

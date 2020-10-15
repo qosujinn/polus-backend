@@ -1,3 +1,5 @@
+
+
 const ENV = require('./.helper').CONF.env,
 helpr = require('./.helper'),
 https = require('https'),
@@ -20,6 +22,7 @@ const app = {
     */
    initialize: async () => {
       let services = await lib()
+
       controller( router, services ).then( () => {
          
          //start the https server, passing the options and the express object

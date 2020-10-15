@@ -4,7 +4,7 @@ module.exports = async function() {
 
    let obj = {}
 
-   console.log('\n[boot/lib] initializing libraries...')
+   console.log('\n[boot/lib] initializing libraries...'.yellow)
    let files = glob.sync('./src/lib/services/**/index.js')
    while( files.length != 0 ) {
       let file = files.pop()
