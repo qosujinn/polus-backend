@@ -119,7 +119,7 @@ schema = ( options ) => ({
     * 
     */
    views: {
-      'My Items'( value ) {
+      'My Items': function( value ) {
          let filtered = { tickets, tasks }
          filtered['tickets'] = this.tickets.filter( ticket => ticket.owner.name == value )
          filtered['tasks'] = this.tasks.filter( task => task.owner.name == value )
@@ -127,7 +127,7 @@ schema = ( options ) => ({
          return filtered
       },
 
-      'Team Items'( value ) {
+      'Team Items': function( value ) {
          let filtered = { tickets, tasks }
          filtered['tickets'] = this.tickets.filter( ticket => ticket.team == value )
          filtered['tasks'] = this.tasks.filter( task => task.team == value )
