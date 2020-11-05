@@ -43,24 +43,18 @@ expr.get('/login',
       res.send('Authenticated')
 })
 
-expr.get('/s/shibboleth', 
-   passport.authenticate('saml', { failureRedirect: '/', failureFlash: true }),
-   ( req, res) => {
-      res.redirect('/login')
-})
-
 expr.post('/s/shibboleth/callback', 
    require('body-parser').urlencoded({ extended: false }),
    passport.authenticate('saml', { failureRedirect: '/', failureFlash: true }),
    ( req, res ) => {
-      res.redirect('/login')
+      res.redirect('/helpdev/login')
 })
 
 expr.get('/s/shibboleth/fail', ( req, res ) => {
    res.status(401).send('login failed')
 })
 
-expr.get('/s/shibboleth/Shibboleth.sso/Metadata', ( req, res ) => {
+expr.get('/s/shibboleth/metadata', ( req, res ) => {
    res.type('application/xml')
    res.status(200).send( strategy.generateServiceProviderMetadata(fs.readFileSync( shibb.cert_sp, 'utf-8')) )
 })
@@ -71,6 +65,6 @@ function ensureAuth( req, res, next ) {
    if( req.isAuthenticated() ) {
       return next()
    } else {
-      return res.redirect('/s/shibboleth')
+      return res.redirect('/polus/s/shibboleth')
    }
 }

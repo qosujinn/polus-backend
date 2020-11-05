@@ -121,16 +121,16 @@ schema = ( options ) => ({
    views: {
       'My Items'( value ) {
          let filtered = { tickets, tasks }
-         filtered['tickets'] = data['tickets'].filter( ticket => ticket.owner == value )
-         filtered['tasks'] = data['tasks'].filter( task => task.owner == value )
+         filtered['tickets'] = this.tickets.filter( ticket => ticket.owner.name == value )
+         filtered['tasks'] = this.tasks.filter( task => task.owner.name == value )
 
          return filtered
       },
 
       'Team Items'( value ) {
          let filtered = { tickets, tasks }
-         filtered['tickets'] = data['tickets'].filter( ticket => ticket.team == value )
-         filtered['tasks'] = data['tasks'].filter( task => task.team == value )
+         filtered['tickets'] = this.tickets.filter( ticket => ticket.team == value )
+         filtered['tasks'] = this.tasks.filter( task => task.team == value )
 
          return filtered
       }
