@@ -118,21 +118,23 @@ schema = ( options ) => ({
     * @member Team Items @memberof widget.views - filters the widgets by current user's team
     * 
     */
-   views: {
-      'My Items': function( value ) {
-         let filtered = { tickets, tasks }
-         filtered['tickets'] = this.tickets.filter( ticket => ticket.owner.name == value )
-         filtered['tasks'] = this.tasks.filter( task => task.owner.name == value )
+   views: function() {
+      return {
+         'My Items': function( value ) {
+            let filtered = { tickets, tasks }
+            filtered['tickets'] = this.tickets.filter( ticket => ticket.owner.name == value )
+            filtered['tasks'] = this.tasks.filter( task => task.owner.name == value )
 
-         return filtered
-      },
+            return filtered
+         },
 
-      'Team Items': function( value ) {
-         let filtered = { tickets, tasks }
-         filtered['tickets'] = this.tickets.filter( ticket => ticket.team == value )
-         filtered['tasks'] = this.tasks.filter( task => task.team == value )
+         'Team Items': function( value ) {
+            let filtered = { tickets, tasks }
+            filtered['tickets'] = this.tickets.filter( ticket => ticket.team == value )
+            filtered['tasks'] = this.tasks.filter( task => task.team == value )
 
-         return filtered
+            return filtered
+         }
       }
    }
 })
