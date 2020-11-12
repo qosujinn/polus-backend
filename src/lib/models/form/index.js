@@ -8,11 +8,12 @@
  * @requires module:crud
  */
 
-const { glob, path, colors } = require('../../../.helper'),
+const { glob, path, colors, log } = require('../../../.helper'),
 crud = require('../../crud'),
 forms = {
    defaults: []
-}
+},
+logger = log()
 
 let _form = ( forms ) => ({
    forms,
@@ -33,7 +34,7 @@ let _form = ( forms ) => ({
             return null 
          }		
 		} catch(error) {
-			console.log('there was an error:\n', error);
+			console.log(`[lib/models] there was an error:\n`.red, error);
 			return error
 		}
    }
@@ -45,7 +46,7 @@ let _form = ( forms ) => ({
  * @return {closure} closure fuction holding the forms and getter
  */
 module.exports = () =>  {
-   console.log('\n[boot/lib/models] gathering forms...'.yellow)
+   logger.append('boot', `[boot/lib/models] gathering forms...`.yellow)
    let files = glob.sync('./.data/forms/**/**.json')
    files.forEach( file => {
 		//read the file
@@ -56,7 +57,7 @@ module.exports = () =>  {
          if( form.name.includes('Default') ) {
             //add them to forms object
             forms.defaults.push(form);
-            console.log(`[boot/lib/models] -->> form added to defaults: ${form.name}`.green);
+            logger.append( 'boot', `[boot/lib/models] -->> form added to defaults: ${form.name}`.green);
    
          } else {
             
@@ -68,7 +69,7 @@ module.exports = () =>  {
             }
    
             forms[form.tenant][form.service].push( form );
-            console.log(`[boot/lib/models] -->> form added to ${form.tenant}/${form.service}: ${form.name} (${form.category} > ${form.subcategory})`.green);
+            logger.append( `boot`, `[boot/lib/models] -->> form added to ${form.tenant}/${form.service}: ${form.name} (${form.category} > ${form.subcategory})`.green);
          }
       })
    })

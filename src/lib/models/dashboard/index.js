@@ -8,8 +8,10 @@
  * @requires module:helper.colors
  */
 
-const { glob, path, colors } = require('../../../.helper'),
+const { glob, path, colors, log } = require('../../../.helper'),
 boards = {}
+
+let logger = log()
 
 let _dashboard = ( boards ) => ({
    boards,
@@ -29,14 +31,14 @@ let _dashboard = ( boards ) => ({
  * @return {closure} closure fuction holding the boards and getter
  */
 module.exports = () =>  {
-   console.log('\n[boot/lib/models] gathering dashboard schemas..'.yellow)
+   logger.append( 'boot', '[boot/lib/models] gathering dashboard schemas...')
    let files = glob.sync('./src/lib/models/dashboard/schemas/**.js')
    while( files.length != 0 ) {
       let file = files.pop()
       let { name, schema } = require( path.resolve(file) )
       if( name && schema ) {
          boards[name] = schema
-         console.log(`-->> ${name.green} schema loaded`)
+         logger.append('boot', `[boot/lib/models] -->> ${name} schema loaded`)
       }
    }
 

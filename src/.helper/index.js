@@ -6,6 +6,8 @@ module.exports = {
     */
    CONF: require('../../config'),
 
+   log: require('./log'),
+
    /**
     * small scripts that can make your dev life easier :)
     * get creative, and add one to ./util directory
@@ -19,6 +21,7 @@ module.exports = {
    fs: require('fs'),
    crypto: require('crypto'),
    path: require('path'),
+   zlib: require('zlib'),
 
    /** 
     * app modules

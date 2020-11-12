@@ -1,10 +1,13 @@
-let service = require('./service'),
+let { log } = require('../.helper'),
+ service = require('./service'),
 event = require('./event'),
 command = require('./command')
 
+let logger = log()
+
 module.exports = ( router, lib ) => {
    return new Promise( (rsl, rej) => {
-      console.log('\n[boot/controller] creating controllers...'.yellow)
+      logger.append( 'boot', '[boot/controller] creating controllers...')
       //get the list of services
       let services = Object.keys(lib)
       //loop through the list and add them to the controllers
@@ -40,7 +43,8 @@ module.exports = ( router, lib ) => {
             router.post(`/c/:service/:command`, command.controller.post )
          }
       })
-
+      
+      logger.append( 'boot', '[boot/controller] controller initialized')
       rsl()
    })
 }
