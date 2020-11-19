@@ -35,11 +35,11 @@ module.exports = _dash
 
 async function getTickets( options ) {
    let tickets = []
-   
+   console.log('getTickets hit')
    let body = options['hrcase']
    let get = request(`${ENV.domain}`, 'json', 200),
-   hrcases = await get(`/s/cherwell/hrcase`, body)
-
+   hrcases = await get(`/s/cherwell/object/hrcase`, body)
+   
    if( hrcases ) {
       //TODO: finish this, HRCases need parsing 
       tickets = tickets.concat( hrcases )
@@ -48,6 +48,7 @@ async function getTickets( options ) {
    body = options['incident'],
    get = request(`${ENV.domain}`, 'json', 200),
    incidents = await get('/s/cherwell/object/incident', body)
+   
    if( incidents ) {
       let parsed = []
       while( incidents.length != 0) {
@@ -64,7 +65,7 @@ async function getTickets( options ) {
 }
 
 async function getTasks( options ) {
-   
+   console.log('getTasks hit')
    let tasks = [],
    body = options
    let get = request(`${ENV.domain}`, 'json', 200),

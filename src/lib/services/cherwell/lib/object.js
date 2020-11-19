@@ -58,24 +58,23 @@ module.exports = {
     */
    async get( id, name ) {
       return new Promise( async ( rsl, rej ) => {
-         try {
-            req_options.setHeaders( {
-               'api-key': CONFIG.client_id,
-               'Authorization': `Bearer ${CONFIG.token.access}`
+         req_options.setHeaders( {
+            'api-key': CONFIG.client_id,
+            'Authorization': `Bearer ${CONFIG.token.access}`
+         })
+      
+         let objid = await getObjectId( name )
+         if( objid ) {
+            let get = request( req_options.url, req_options.headers, 'json', 200)
+            let path = `/api/V1/getbusinessobject/busobid/${objid}/publicid/${id}` 
+            get( path ).then( result => {
+               console.log( result )
+               rsl( result )
+            }).catch( e => {
+               rej( e )
             })
-         
-            let objId = await getObjectId( name )
-            if( objId ) {
-               console.log( objid )
-               let get = request( req_options.url, req_options.headers, 'json', 200),
-               result = await get(`/api/V1/getbusinessobject/busobid/${objid}/publicid/${id}`)
-               if( result ) {
-                  console.log( result )
-                  rsl( result )
-               }
-            }
-         } catch( e ) {
-            rej( e )
+         } else {
+            rej( null )
          }
       })
    },
@@ -94,9 +93,13 @@ module.exports = {
       
          let objid = await getObjectId( name )
          if( objid ) {
-            let get = request( req_options.url, req_options.headers, 'json', 200),
+            let get = request( req_options.url, req_options.headers ),
             result = await get(`/api/V1/getbusinessobject/busobid/${objid}/busobrecid/${id}`)
-            return result
+            if( result ) {
+               return result
+            } else {
+               return null
+            }
          } 
       } catch( e ) {
          console.log( e )
@@ -209,7 +212,6 @@ module.exports = {
 async function getObjectId( name ) {
    return new Promise( async ( rsl, rej ) => {
       if( OBJ_ID[name] ) {
-         console.log( OBJ_ID[name] )
          rsl( OBJ_ID[name] )
       } else {
          req_options.setHeaders( {
@@ -217,7 +219,7 @@ async function getObjectId( name ) {
             'Authorization': `Bearer ${CONFIG.token.access}`
          })
          let get = request( req_options.url, req_options.headers, 'json'),
-         result = await get(`/api/V1/getbusinessobjectsummary/busobname/${name}`)  
+         result = await get(`/api/V1/getbusinessobjectsummary/busobname/${name}`) 
          if( result === [] ) { 
             rej( null ) 
          }

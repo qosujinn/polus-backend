@@ -62,7 +62,6 @@ module.exports = ( worker ) => ({
           * @param res - the response object
           */
          get: async ( req, res ) => {
-            console.log('hit')
             let id = req.params.id,
             name = req.params.name.toLowerCase()
    
