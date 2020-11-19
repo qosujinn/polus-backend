@@ -8,12 +8,40 @@
  * @requires module:crud
  */
 
-const { glob, path, colors, log } = require('../../../.helper'),
+const { glob, path, colors } = require('../../.helper'),
 crud = require('../../crud'),
 forms = {
    defaults: []
 },
-logger = log()
+logger = require('../../.helper').logger()
+
+logger.log('boot', `[boot/lib/models] gathering forms...`.yellow)
+let files = glob.sync('./.data/forms/**/**.json')
+files.forEach( file => {
+   //read the file
+   crud.read( file ).then( form => {
+      form = JSON.parse( form )
+      
+      //check for default forms
+      if( form.name.includes('Default') ) {
+         //add them to forms object
+         forms.defaults.push(form);
+         logger.log( 'boot', `[boot/lib/models] -->> form added to defaults: ${form.name}`.green);
+
+      } else {
+         
+         if( !forms.hasOwnProperty(form.tenant) ) {
+            forms[form.tenant] = { [form.service]: new Array() }
+         }
+         else if( !forms[form.tenant].hasOwnProperty(form.service) ) {
+            forms[form.tenant][form.service] = new Array()
+         }
+
+         forms[form.tenant][form.service].push( form );
+         logger.log( `boot`, `[boot/lib/models] -->> form added to ${form.tenant}/${form.service}: ${form.name} (${form.category} > ${form.subcategory})`.green);
+      }
+   })
+})
 
 let _form = ( forms ) => ({
    forms,
@@ -40,39 +68,4 @@ let _form = ( forms ) => ({
    }
 })
 
-/**
- * @function init
- * @summary intializes the form model, gathering the available forms
- * @return {closure} closure fuction holding the forms and getter
- */
-module.exports = () =>  {
-   logger.append('boot', `[boot/lib/models] gathering forms...`.yellow)
-   let files = glob.sync('./.data/forms/**/**.json')
-   files.forEach( file => {
-		//read the file
-      crud.read( file ).then( form => {
-         form = JSON.parse( form )
-         
-         //check for default forms
-         if( form.name.includes('Default') ) {
-            //add them to forms object
-            forms.defaults.push(form);
-            logger.append( 'boot', `[boot/lib/models] -->> form added to defaults: ${form.name}`.green);
-   
-         } else {
-            
-            if( !forms.hasOwnProperty(form.tenant) ) {
-               forms[form.tenant] = { [form.service]: new Array() }
-            }
-            else if( !forms[form.tenant].hasOwnProperty(form.service) ) {
-               forms[form.tenant][form.service] = new Array()
-            }
-   
-            forms[form.tenant][form.service].push( form );
-            logger.append( `boot`, `[boot/lib/models] -->> form added to ${form.tenant}/${form.service}: ${form.name} (${form.category} > ${form.subcategory})`.green);
-         }
-      })
-   })
-
-   return _form( forms )
-}
+module.exports = _form( forms )

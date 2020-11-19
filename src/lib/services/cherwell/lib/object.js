@@ -1,15 +1,16 @@
 /**
- * Module for Cherwell's business object methods
+ * Module for Cherwell's user methods
  * @module cherwell/object
  * @requires module:helper.request
  * @requires module:helper.urlencode
  */
 
-let { _request, request, urlencode } = require('../../.helper'),
-CONFIG = require('../../.helper').CONF.cherwell,
+let { _request, request, urlencode } = require('../../../.helper'),
+CONFIG = require('../../../.helper').CONF.cherwell,
 req_options = request.OPTS
 
 req_options.setURL( CONFIG.baseurl )
+let logger = require('../../../.helper').logger()
 
 const OBJ_ID = {}
 
@@ -56,18 +57,27 @@ module.exports = {
     * @return {object} the business object
     */
    async get( id, name ) {
-      req_options.setHeaders( {
-         'api-key': CONFIG.client_id,
-         'Authorization': `Bearer ${CONFIG.token.access}`
+      return new Promise( async ( rsl, rej ) => {
+         try {
+            req_options.setHeaders( {
+               'api-key': CONFIG.client_id,
+               'Authorization': `Bearer ${CONFIG.token.access}`
+            })
+         
+            let objId = await getObjectId( name )
+            if( objId ) {
+               console.log( objid )
+               let get = request( req_options.url, req_options.headers, 'json', 200),
+               result = await get(`/api/V1/getbusinessobject/busobid/${objid}/publicid/${id}`)
+               if( result ) {
+                  console.log( result )
+                  rsl( result )
+               }
+            }
+         } catch( e ) {
+            rej( e )
+         }
       })
-   
-      let objid = await getObjectId( name )
-      if( !objid ) { return null }
-      else {
-         let get = request( req_options.url, req_options.headers, 'json', 200),
-         result = await get(`/api/V1/getbusinessobject/busobid/${objid}/publicid/${id}`)
-         return result
-      } 
    },
 
    /**
@@ -76,18 +86,22 @@ module.exports = {
     * @return {boolean} returns true if successful
     */
    async getByRecId( id, name ) {
-      req_options.setHeaders( {
-         'api-key': CONFIG.client_id,
-         'Authorization': `Bearer ${CONFIG.token.access}`
-      })
-   
-      let objid = await getObjectId( name )
-      if( !objid ) { return null }
-      else {
-         let get = request( req_options.url, req_options.headers, 'json', 200),
-         result = await get(`/api/V1/getbusinessobject/busobid/${objid}/busobrecid/${id}`)
-         return result
-      } 
+      try {
+         req_options.setHeaders( {
+            'api-key': CONFIG.client_id,
+            'Authorization': `Bearer ${CONFIG.token.access}`
+         })
+      
+         let objid = await getObjectId( name )
+         if( objid ) {
+            let get = request( req_options.url, req_options.headers, 'json', 200),
+            result = await get(`/api/V1/getbusinessobject/busobid/${objid}/busobrecid/${id}`)
+            return result
+         } 
+      } catch( e ) {
+         console.log( e )
+         return null
+      }
    },
 
    /**
@@ -153,26 +167,30 @@ module.exports = {
     * @return {object} the search result object
     */
    async search( name, options ) {
-      let busObId = await getObjectId( name )
+      try {
+         let busObId = await getObjectId( name )
 
-      req_options.setHeaders( {
-         'api-key': CONFIG.client_id,
-         'Authorization': `Bearer ${CONFIG.token.access}`
-      })
+         req_options.setHeaders( {
+            'api-key': CONFIG.client_id,
+            'Authorization': `Bearer ${CONFIG.token.access}`
+         })
 
-      let body = { 
-         busObId: busObId,
-         fields: options.fields,
-         filters: options.filters,
-         pageSize: options.pageSize || 200,
-         includeAll: false
-      }
-     
-      let post = request(req_options.url, req_options.headers, 'POST', 'json', 200),
-      result = await post('/api/V1/getsearchresults', body)
+         let body = { 
+            busObId: busObId,
+            fields: options.fields,
+            filters: options.filters,
+            pageSize: options.pageSize || 200,
+            includeAll: false
+         }
       
-      if( !result ) return null
-      else return result
+         let post = request(req_options.url, req_options.headers, 'POST', 'json', 200),
+         result = await post('/api/V1/getsearchresults', body)
+         
+         if( !result ) return null
+         else return result
+      } catch( e ) {
+         return null
+      }
 
    }
 }
@@ -189,21 +207,26 @@ module.exports = {
  * @return {string} object ID
  */
 async function getObjectId( name ) {
-   if( OBJ_ID[name] ) {
-      return OBJ_ID[name]
-   } else {
-      req_options.setHeaders( {
-         'api-key': CONFIG.client_id,
-         'Authorization': `Bearer ${CONFIG.token.access}`
-      })
-      let get = request( req_options.url, req_options.headers, 'json'),
-      result = await get(`/api/V1/getbusinessobjectsummary/busobname/${name}`)
-      if( !result ) { return null }
-      else {
-         OBJ_ID[name] = result[0]['busObId']
-         return OBJ_ID[name]
+   return new Promise( async ( rsl, rej ) => {
+      if( OBJ_ID[name] ) {
+         console.log( OBJ_ID[name] )
+         rsl( OBJ_ID[name] )
+      } else {
+         req_options.setHeaders( {
+            'api-key': CONFIG.client_id,
+            'Authorization': `Bearer ${CONFIG.token.access}`
+         })
+         let get = request( req_options.url, req_options.headers, 'json'),
+         result = await get(`/api/V1/getbusinessobjectsummary/busobname/${name}`)  
+         if( result === [] ) { 
+            rej( null ) 
+         }
+         else {
+            OBJ_ID[name] = result[0]['busObId']
+            rsl( OBJ_ID[name] )
+         }
       }
-   }
+   })
 }
 
 /**
@@ -213,26 +236,26 @@ async function getObjectId( name ) {
  * @param {array} fields - fields to include in the template. an array of field IDs
  */
 async function getObjectTemplate( busObId, required = false, fields = [] ) {
-         
-   //set the options for the request call
-   req_options.setHeaders( {
-      'api-key': CONFIG.client_id,
-      'Authorization': `Bearer ${CONFIG.token.access}`
-   })
+   try {   
+      //set the options for the request call
+      req_options.setHeaders( {
+         'api-key': CONFIG.client_id,
+         'Authorization': `Bearer ${CONFIG.token.access}`
+      })
 
-   let body = {
-      busObId: busObId,
-      fields: fields,
-      includeRequired: required,
-      includeAll: !required
-   }
+      let body = {
+         busObId: busObId,
+         fields: fields,
+         includeRequired: required,
+         includeAll: !required
+      }
 
-   let post = request(req_options.url, req_options.headers, 'POST', 'json', 200),
-   result = await post('/api/V1/getbusinessobjecttemplate', body )
-   if( result.hasError ) {
-      return null
-   } else {
+      let post = request(req_options.url, req_options.headers, 'POST', 'json', 200),
+      result = await post('/api/V1/getbusinessobjecttemplate', body )
       return result
+   } catch( e ) {
+      logger.log( 'services/cherwell', e )
+      return null
    }
 }
 
@@ -244,20 +267,24 @@ async function getObjectTemplate( busObId, required = false, fields = [] ) {
  * @return {object} business object schema
  */
 async function getObjectSchema( name, include ) { 
-   req_options.setHeaders( {
-      'api-key': CONFIG.client_id,
-      'Authorization': `Bearer ${CONFIG.token.access}`
-   })
+   try{
+      req_options.setHeaders( {
+         'api-key': CONFIG.client_id,
+         'Authorization': `Bearer ${CONFIG.token.access}`
+      })
 
-   let objid = await getObjectId( name )
-   if( !objid ) { return null }
-   else {
-      let get = request( req_options.url, req_options.headers, 'json', 200),
-      result = await get(`/api/V1/getbusinessobjectschema/busobid/${objid}?includerelationships=${include}`)
-      if ( !result ) { return null }
+      let objid = await getObjectId( name )
+      if( !objid ) { return null }
       else {
-         return result
+         let get = request( req_options.url, req_options.headers, 'json', 200),
+         result = await get(`/api/V1/getbusinessobjectschema/busobid/${objid}?includerelationships=${include}`)
+         if ( !result ) { return null }
+         else {
+            return result
+         }
       }
+   } catch( e ) {
+      return null
    }
 }
 

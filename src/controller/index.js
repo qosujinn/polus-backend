@@ -1,30 +1,27 @@
-let { log } = require('../.helper'),
+let logger = require('../helper').logger(),
  service = require('./service'),
 event = require('./event'),
 command = require('./command')
 
-let logger = log()
-
 module.exports = ( router, lib ) => {
    return new Promise( (rsl, rej) => {
-      logger.append( 'boot', '[boot/controller] creating controllers...')
       //get the list of services
       let services = Object.keys(lib)
       //loop through the list and add them to the controllers
       services.forEach( name => {
          //since routes tend to have multiple methods we're doing some more looping
-         let handlers = lib[name]['routes']
+         let handles = lib[name]['routes']
       
-         if( handlers ) {
-            //so add the route handlers...
-            service.handler.add( name, handlers )
-            //...get the routes off the handlers..
-            let routes = Object.keys( handlers )
+         if( handles ) {
+            //so add the route handles...
+            service.handler.add( name, handles )
+            //...get the route off the handles..
+            let routes = Object.keys( handles )
             //loop it
             routes.forEach( route => {
                
                //get all the methods for the route
-               let methods = Object.keys( handlers[route] )
+               let methods = Object.keys( handles[route] )
                //loop it
                methods.forEach( method => {
                   //add the route to the router's method function with the controller method function
@@ -43,8 +40,6 @@ module.exports = ( router, lib ) => {
             router.post(`/c/:service/:command`, command.controller.post )
          }
       })
-      
-      logger.append( 'boot', '[boot/controller] controller initialized')
       rsl()
    })
 }

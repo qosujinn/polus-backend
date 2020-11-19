@@ -7,9 +7,9 @@
  * @requires module:model/task
  */
 
-const ENV = require('../../.helper').CONF.env
+const ENV = require('../../../.helper').CONF.env
 
-let { request } = require('../../.helper')
+let { request } = require('../../../.helper')
 let _ticket = require('../../.models').ticket,
 _task = require('../../.models').task,
 model = require('../../.models').dashboard
@@ -41,12 +41,13 @@ async function getTickets( options ) {
    hrcases = await get(`/s/cherwell/hrcase`, body)
 
    if( hrcases ) {
+      //TODO: finish this, HRCases need parsing 
       tickets = tickets.concat( hrcases )
    }
 
    body = options['incident'],
    get = request(`${ENV.domain}`, 'json', 200),
-   incidents = await get('/s/cherwell/incident', body)
+   incidents = await get('/s/cherwell/object/incident', body)
    if( incidents ) {
       let parsed = []
       while( incidents.length != 0) {
@@ -67,7 +68,7 @@ async function getTasks( options ) {
    let tasks = [],
    body = options
    let get = request(`${ENV.domain}`, 'json', 200),
-   objects = await get(`/s/cherwell/task`, body)
+   objects = await get(`/s/cherwell/object/task`, body)
    if( objects ) {
       while( objects.length != 0) {
          let task = objects.pop(),

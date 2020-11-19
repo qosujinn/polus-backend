@@ -1,4 +1,4 @@
-const { glob, path, colors } = require('../.helper')
+const { glob, path, colors } = require('./.helper')
 
 module.exports = async function() {
 
@@ -13,7 +13,7 @@ module.exports = async function() {
          //initialize the service to get its name and handler 
          let lib = await service()
          if( lib ) {
-            obj[lib.name] = lib.handler
+            obj[lib.name] = lib.handles
          }
       }
    }

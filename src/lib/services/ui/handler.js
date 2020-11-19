@@ -1,75 +1,142 @@
-let { request } = require('../.helper'),
-ENV = require('../.helper').CONF.env
 
-let dashboard = require('./lib/dashboard'),
-ticket = require('./lib/ticket'),
-task = require('./lib/task'),
-form = require('./lib/form')
-
-let routes =  {
-   '/tickets/:id': {
-      get: async ( req, res ) => {
-          let data = await ticket.get( req.params.id )
-          if( data ) {
-             res.status(200).send(data)
-          } else { 
-             res.status(500).send(`something happened on the server; couldn't get the ticket :(`) 
+module.exports = ( worker ) => ({ 
+   routes:  {
+      '/tickets/:id': {
+         get: async ( req, res ) => {
+            try {
+               let data = await worker.ticket.get( req.params.id )
+               if( data ) {
+                  res.status(200).send(data)
+               } else { 
+                  res.status(404).send(`something happened on the server; couldn't get the ticket :(`) 
+                  }
+            } catch( e ) {
+               console.log( e )
+               res.status(500).send( 'there was an error on the server' )
             }
-      }
-   },
-
-   '/tasks/:id': {
-      get: async ( req, res ) => {
-         let data = await task.get( req.params.id )
-         if( data ) {
-            res.status(200).send(data)
-         } else { 
-            res.status(500).send(`something happened on the server; couldn't get the task :(`) 
-           }
-     }
-   },
-
-   '/dashboards/:name': {
-      post: async ( req, res ) => {
-         let data = await dashboard.get( req.params.name, req.body )
-         if( data ) {
-            res.status(200).send(data)
-         } else {
-            res.status(500).send(`something happened on the server; couldn't get the dashboard :(`)
          }
-      }
-   },
+      },
 
-   '/forms/:tenant/:service/:category/:subcategory': {
-      get: async ( req, res ) => {
-         //search the catalogs for the subcategory
-         let tenant = req.params.tenant,
-         service = req.params.service,
-         category = req.params.category,
-         subcategory = req.params.subcategory;
-         //get the form needed
-         let data = await form.get( tenant, { service, category, subcategory } )
-         //if there's a form, send it
-         if( data ) {
-            res.status(200).send(data);
-         } else {
-            //if not, it's likely an error. send the status and message back
-            res.status(500).send(`something happened on the server; couldn't get the form :(`);
+      '/tasks/:id': {
+         get: async ( req, res ) => {
+            try {
+               let data = await worker.task.get( req.params.id )
+               if( data ) {
+                  res.status(200).send(data)
+               } else { 
+                  res.status(404).send(`couldn't get the task`) 
+               }
+            } catch( e ) {
+               console.log( e )
+               res.status(500).send('there was an error on the server')
+            }
          }
-      }
-   },
+      },
 
-   '/forms/submit': {
-      post: async( req, res ) => {
-         let data = req.body,
-         result = await form.submit( data )
-         if( result ) {
-            res.status(200).send(true)
-         } else {
-            res.status(404).send(null)
+      '/dashboards/:name': {
+         post: async ( req, res ) => {
+            try {
+               let data = await worker.dashboard.get( req.params.name, req.body )
+               if( data ) {
+                  res.status(200).send(data)
+               } else {
+                  res.status(500).send(`something happened on the server; couldn't get the dashboard :(`)
+               }
+            } catch( e ) {
+               console.log( e )
+               res.status(500).send( 'there was an error on the server' )
+            }
+         }
+      },
+
+      '/forms/:tenant/:service/:category/:subcategory': {
+         get: async ( req, res ) => {
+            try{
+               //search the catalogs for the subcategory
+               let tenant = req.params.tenant,
+               service = req.params.service,
+               category = req.params.category,
+               subcategory = req.params.subcategory;
+               //get the form needed
+               let data = await worker.form.get( tenant, { service, category, subcategory } )
+               //if there's a form, send it
+               if( data ) {
+                  res.status(200).send(data);
+               } else {
+                  //if not, send a 404
+                  res.status(404).send(`couldn't get the form`);
+               }
+            } catch( e ) {
+               res.status(500).send( 'there was an error on the server' )
+            }
+         }
+      },
+
+      '/forms/submit': {
+         post: async( req, res ) => {
+            try {
+               let data = req.body,
+               result = await worker.form.submit( data )
+               if( result ) {
+                  res.status(200).send(true)
+               } else {
+                  res.status(404).send(null)
+               }
+            } catch( e ) {
+               console.log( e )
+               res.status(500).send( 'there was an error on the server' )
+            }
+         }
+      },
+
+      '/users': {
+         get: async( req, res ) => {
+            try {
+               let team = req.query.team,
+               result = await worker.user.getUsers( team )
+               if( result ) {
+                  res.status(200).send( result )
+               } else res.status(404).send('users not found for given team')
+            } catch( e ) {
+               console.log( e )
+               res.status(500).send( 'there was an error on the server' )
+            }
+         }
+      },
+
+      '/users/:name': {
+         get: async( req, res ) => {
+            try {
+               let name = req.params.name,
+               result = await worker.user.get( name )
+               if( result ) {
+                  console.log( result )
+                  res.status(200).send( result )
+               } else res.status(404).send('user not found')
+            } catch( e ) {
+               console.log( e )
+               res.status(500).send('there was an error on the server' )
+            }
+         }
+      },
+
+      '/catalogs/:tenant/:type': {
+         get: async( req, res ) => {
+            try {
+               let tenant = req.params.tenant.toUpperCase(),
+               type = req.params.type.toLowerCase()
+
+               let result = await worker.catalog.get( type, tenant )
+               if( result ) {
+                  res.status(200).send( result )
+               } else {
+                  res.status(404).send('catalog not found')
+               }
+            } catch( e ) {
+               console.log( e )
+               res.status(500).send('there was an error on the server' )
+            }
          }
       }
    }
-}
-
-module.exports = { routes }
+})

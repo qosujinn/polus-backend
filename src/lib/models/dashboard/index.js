@@ -8,10 +8,21 @@
  * @requires module:helper.colors
  */
 
-const { glob, path, colors, log } = require('../../../.helper'),
+const { glob, path, colors } = require('../../.helper'),
 boards = {}
 
-let logger = log()
+let logger = require('../../.helper').logger()
+
+logger.log( 'boot', '[boot/lib/models] gathering dashboard schemas...')
+let files = glob.sync('./src/lib/models/dashboard/schemas/**.js')
+while( files.length != 0 ) {
+   let file = files.pop()
+   let { name, schema } = require( path.resolve(file) )
+   if( name && schema ) {
+      boards[name] = schema
+      logger.log('boot', `[boot/lib/models] -->> ${name} schema loaded`)
+   }
+}
 
 let _dashboard = ( boards ) => ({
    boards,
@@ -25,22 +36,4 @@ let _dashboard = ( boards ) => ({
    }
 })
 
-/**
- * @function init
- * @summary intializes the dashboard model, gathering the available schemas
- * @return {closure} closure fuction holding the boards and getter
- */
-module.exports = () =>  {
-   logger.append( 'boot', '[boot/lib/models] gathering dashboard schemas...')
-   let files = glob.sync('./src/lib/models/dashboard/schemas/**.js')
-   while( files.length != 0 ) {
-      let file = files.pop()
-      let { name, schema } = require( path.resolve(file) )
-      if( name && schema ) {
-         boards[name] = schema
-         logger.append('boot', `[boot/lib/models] -->> ${name} schema loaded`)
-      }
-   }
-
-   return _dashboard( boards )
-}
+module.exports = _dashboard( boards )

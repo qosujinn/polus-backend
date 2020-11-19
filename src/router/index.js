@@ -4,7 +4,7 @@ session = require('express-session'),
 SAML = require('passport-saml').Strategy
 
 const { env, shibb } = require('../../config')
-const { fs } = require('../.helper')
+const { fs } = require('../helper')
 
 let strategy = new SAML(
    {

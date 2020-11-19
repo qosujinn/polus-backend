@@ -1,6 +1,6 @@
-const ENV = require('../../.helper').CONF.env
+const ENV = require('../../../.helper').CONF.env
 
-let { request } = require('../../.helper'),
+let { request } = require('../../../.helper'),
 model = require('../../.models').ticket
 
 const TYPE = [ 'incident', 'hrcase' ]
@@ -13,13 +13,13 @@ const _ticket = {
       
       //check for the ticket by trying each type
       for( let i = 0; i <= TYPE.length - 1; i++ ) {
-         let result = await get(`${ENV.domain}/s/cherwell/${TYPE[i]}/${id}`)
+         let result = await get(`${ENV.domain}/s/cherwell/object/${TYPE[i]}/publicId/${id}`)
          if( result.statusCode == 200 ) {
             //create a ticket, then parse the cherwell data and add it
             let ticket = model( result.data.busObPublicId )
             .parse( 'cherwell', result.data )
             //get the latest email for the ticket
-            result = await get(`${ENV.domain}/s/cherwell/${TYPE[i]}/${ticket.recId}/email`)
+            result = await get(`${ENV.domain}/s/cherwell/object/${TYPE[i]}/recId/${ticket.recId}/email`)
             if( result.statusCode == 200 ) { 
                //get the Details field from the result
                let details

@@ -6,13 +6,13 @@ module.exports = {
     */
    CONF: require('../../config'),
 
-   log: require('./log'),
+   logger: require('./logger'),
 
    /**
     * small scripts that can make your dev life easier :)
     * get creative, and add one to ./util directory
     */
-   util: require('util'),
+   scripts: require('./scripts'),
    
    /**
     * native modules
@@ -22,6 +22,7 @@ module.exports = {
    crypto: require('crypto'),
    path: require('path'),
    zlib: require('zlib'),
+   util: require('util'),
 
    /** 
     * app modules
@@ -34,7 +35,6 @@ module.exports = {
    request uses bent, an http client, for making requests
    https://github.com/mikeal/bent
    */
-   _request: require('request'),
    request: require('./request'),
    
 

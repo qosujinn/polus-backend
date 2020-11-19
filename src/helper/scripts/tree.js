@@ -35,7 +35,7 @@ class Tree {
     });
   }
 
-  _removeNode(value) {
+  removeNode(value) {
     this._traverse((node) => {
       node.children.forEach((childNode, index) => {
         if (childNode.value === value) {
@@ -60,7 +60,7 @@ class Tree {
     return returnNode;
   }
 
-  _displayLeafs(parentValue) {
+  displayLeafs(parentValue) {
     const parentNode = typeof parentValue === 'string' ? this._search(parentValue) : parentValue ;
     let leafsRet = [];
     if (parentValue.children && !parentValue.children.length) {

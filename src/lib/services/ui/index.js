@@ -7,8 +7,14 @@
 
 const name = 'ui'
 
+const logger = require('../../.helper').logger(),
+handler = require('./handler'),
+worker = require('./worker')()
+
 module.exports = async function() {
-   handler = require('./handler')
-   console.log(`[lib/services/ui] ${name} service initialized`.green)
-   return { name, handler }
+   logger.log('boot', `[boot/services/ui] initializing ui service...`)
+   worker.init()
+   handles = handler( worker )
+   logger.log( 'boot', `[boot/services/ui] ui service initialized`)
+   return { name, handles }
 }

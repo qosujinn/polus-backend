@@ -7,7 +7,8 @@
 module.exports = {
    ticket: require('./ticket'),
    task: require('./task'),
-   dashboard: require('./dashboard')(),
-   form: require('./form')(),
+   dashboard: require('./dashboard'),
+   form: require('./form'),
+   catalog: require('./catalog'),
    user: require('./user')
 }

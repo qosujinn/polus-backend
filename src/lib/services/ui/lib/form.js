@@ -1,6 +1,6 @@
-const ENV = require('../../.helper').CONF.env
+const ENV = require('../../../.helper').CONF.env
 
-let { request } = require('../../.helper'),
+let { request } = require('../../../.helper'),
 model = require('../../.models').form
 
 const _form = {
@@ -17,7 +17,7 @@ const _form = {
      //create a post request for the ticket creation
      post = request(ENV.domain, 'POST', 'json', 200)
       
-     let result = await post(`/s/cherwell/${form.type}`, form)
+     let result = await post(`/s/cherwell/object/${form.type}`, form)
      if( result ) {
         res.status(200).send(true)
      } else {

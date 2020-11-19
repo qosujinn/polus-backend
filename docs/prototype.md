@@ -40,4 +40,3 @@ Clicking on a listing in the ticket widget on a dashboard, or navigating to the 
 
 Tasks work in the same way, showing the details of a task.
 ![task](images/prototype/task.png)
-

@@ -1,39 +1,32 @@
-let { request } = require('../../.helper')
+const { get } = require('../../../models/dashboard')
 
-module.exports = ( id, options ) => {
-	return new Promise ( (rsl, rej) => {
-		console.log(options)
-		let req_options = {
-			url: `${this.base_url}/CherwellAPI/api/V1/getsearchresults`,
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			auth: {
-				bearer: this.access_token
-			},
-			form: { 
-				"busObId": id,
-				"fields": options.fields,
-				"filters": options.filters,
-				"pageSize": options.pageSize || 200,
-				"includeAll": !options.fields.length
-			}
-		}
+let { request } = require('../../../.helper'),
+CONFIG = require('../../../.helper').CONF.cherwell,
+req_options = request.OPTS
 
-		request( req_options, (err, res, body) => {
-			body = JSON.parse(body)
-			if(res.statusCode != 200) {
-				let msg = body.Message ? body.Message : body.errorMessage;
-				console.log('backend/cherwell/index.js[search]: there was an error.');
-				console.log('error: ', err);
-				console.log('body: ', body);
+req_options.setURL( CONFIG.baseurl )
+let logger = require('../../../.helper').logger()
 
-				rej({ status: res.statusCode, errorCode: body.errorCode, message: msg });
+module.exports = {
+
+	async getSearchResults( options ) {
+		try { 
+			console.log('search; hit')
+			req_options.setHeaders( {
+				'api-key': CONFIG.client_id,
+				'Authorization': `Bearer ${CONFIG.token.access}`
+			})
+			let post = request(req_options.url, req_options.headers, 'POST', 'json', 200, 404),
+			result = post( '/api/V1/getsearchresults', options )
+			if( result ) {
+				console.log( result )
+				return result
 			} else {
-				console.log(`search result: ${body}`)
-				rsl(body);
+				return null
 			}
-		})
-	})
+		} catch( e ) {
+			console.log( e )
+			return null
+		}
+	}
 }
