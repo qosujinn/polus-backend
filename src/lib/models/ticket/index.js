@@ -71,7 +71,7 @@ function parseCherwell( data, ticket ) {
    
    let parsed = {
       recId: data.busObRecId,
-      objId: data.busObId,
+      busObId: data.busObId,
       owner: {},
       requestor: {},
       classification: {}

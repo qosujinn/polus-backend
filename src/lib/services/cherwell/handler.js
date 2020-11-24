@@ -41,8 +41,9 @@ module.exports = ( worker ) => ({
           * @param res - the response object
           */
          post: async ( req, res ) => {
+            console.log('object post route hit')
             let name = req.params.name.toLowerCase(),
-            success = await worker.object.create( name, res.body )
+            success = await worker.object.create( name, req.body )
             if( !success ) res.status(500).send()
             else res.status(200).send()
             

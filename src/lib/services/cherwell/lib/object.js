@@ -29,14 +29,19 @@ module.exports = {
     * @return {boolean} returns true if successful
     */
    async create( name, data ) {
-      //create the object
-      let object = await createObject( name, data )
-      //then save the object
-      let result = await saveObject( object )
-      if( result ) {
-         res.status(200).send(true)
-      } else {
-         res.status(400).send(false)
+      try{
+         //create the object
+         let object = await createObject( name, data )
+         //then save the object
+         let result = await saveObject( object, true )
+         if( result ) {
+            return true
+         } else {
+            return false
+         }
+      } catch( e ) {
+         console.log( e )
+         return false
       }
 
    },
@@ -211,9 +216,6 @@ module.exports = {
  */
 async function getObjectId( name ) {
    return new Promise( async ( rsl, rej ) => {
-      if( OBJ_ID[name] ) {
-         rsl( OBJ_ID[name] )
-      } else {
          req_options.setHeaders( {
             'api-key': CONFIG.client_id,
             'Authorization': `Bearer ${CONFIG.token.access}`
@@ -227,7 +229,7 @@ async function getObjectId( name ) {
             OBJ_ID[name] = result[0]['busObId']
             rsl( OBJ_ID[name] )
          }
-      }
+
    })
 }
 
@@ -333,36 +335,44 @@ async function getRelatedObjects( recId, name, options ) {
  * @return {object} resolves or rejects
  */
 async function createObject( name, data ) {
-   //first, get the object template
-   let objId = await getObjectId( name )
-   if( objId ) {
-      let template = await getObjectTemplate( objid )
-      if( template ) {
-         //set the object values from the result
-         let fields = template.fields;
-         let obj = { 
-            busObId: objId,
-            fields: []
-         };
-         //then set the field values from the data
-         fields.forEach(field =>  {
-            data.fields.forEach(item => {
-               if(item.name == field.name) {
-                  //insert the value, and set dirty to true
-                  if(item.name == "Description") { field.html = item.html; }
-                  field.value = item.value;
-                  field.dirty = true;
-                  //add field to object array
-                  obj.fields.push(field);
-               }
+   try {
+      //first, get the object template
+      let objId = await getObjectId( name )
+      if( objId ) {
+         let template = await getObjectTemplate( objId )
+         
+         if( template ) {
+            //set the object values from the result
+         
+            let obj = { 
+               busObId: objId,
+               busObPublicId: data.busObPublicId,
+               busObRecId: data.busObRecId,
+               fields: []
+            };
+            //then set the field values from the data
+            template.fields.forEach(field =>  {
+               data.fields.forEach(item => {
+                  if(item.name == field.name) {
+                     //insert the value, and set dirty to true
+                     if(item.name == "Description") { field.html = item.html; }
+                     field.value = item.value;
+                     field.dirty = true;
+                     //add field to object array
+                     obj.fields.push(field);
+                  }
+               });
             });
-         });
-         //return the object
-         return obj
+            //return the object
+            return obj
+         } else {
+            return null
+         }
       } else {
          return null
       }
-   } else {
+   } catch( e ) {
+      console.log( e )
       return null
    }
 }
@@ -372,21 +382,39 @@ async function createObject( name, data ) {
  * @param {object} obj - the object to be saved
  * @return {Promise} resolves or rejects
  */
-async function saveObject( obj ) {
-   //set the persist value
-   obj.persist = persist;
-   //set the options for the request call
-   req_options.setHeaders( {
-      'api-key': CONFIG.client_id,
-      'Authorization': `Bearer ${CONFIG.token.access}`
-   })
+async function saveObject( obj, persist ) {
+   return new Promise( (rsl, rej) => {
+      try {
+         //set the persist value
+         obj.persist = persist;
+         //set the options for the request call
+         let options = {
+            url: `${CONFIG.baseurl}/CherwellAPI/api/V1/savebusinessobject`,
+            method: 'POST',
+            headers: {
+               'Content-Type': 'application/json'
+            },
+            auth: {
+               bearer: this.access_token
+            },
+            form: obj
+         };
 
-   let post = request(req_options.url, req_options.headers, 'POST', 'json', 200),
-   result = await post('/api/V1/savebusinessobject', obj )
-   if( result.statusCode != 200 ) {
-      return null
-   }
-   else {
-      return true
-   }
+         _request(options, (err, res, body) => {
+            console.log( body )
+            if( res.statusCode != 200 ) {
+               console.log(body);
+               let msg = body.Message ? body.Message : body.errorMessage;
+               rej(null);
+            }
+            else {
+               rsl(body);
+            }
+         });
+      }
+      catch(error) {
+         console.log('error: \n', error);
+         rej(null);
+      }
+   })
 }

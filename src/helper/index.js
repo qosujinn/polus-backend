@@ -36,6 +36,7 @@ module.exports = {
    https://github.com/mikeal/bent
    */
    request: require('./request'),
+   _request: require('request'),
    
 
    /*

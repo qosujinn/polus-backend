@@ -1,3 +1,5 @@
+const { truncate } = require('lodash')
+
 const ENV = require('../../../.helper').CONF.env
 
 let { request } = require('../../../.helper'),
@@ -20,6 +22,8 @@ const _ticket = {
                //create a ticket, then parse the cherwell data and add it
                let ticket = model( result.busObPublicId )
                .parse( 'cherwell', result )
+               //set the type of ticket
+               ticket.set( { type: TYPE[i] })
                //get the latest email for the ticket
                result = await get(`${ENV.domain}/s/cherwell/object/${TYPE[i]}/recId/${ticket.recId}/email`)
                if( result.statusCode == 200 ) { 
@@ -38,7 +42,6 @@ const _ticket = {
                   ticket.set( { email: email } )
                }
                //return when done
-               console.log('done')
                return ticket
       
             }
@@ -52,9 +55,62 @@ const _ticket = {
       }
    },
 
-   async update() {
+   async save( data ) {
+      let obj = createCherwellData( data )
+      let post = request( 'json', 'POST', 200 )
+      let success = await post( `${ENV.domain}/s/cherwell/object/${data.type}`, obj )
+      if( success ) {
+         return true
+      } else {
+         return false
+      }
 
    }
 }
 
 module.exports = _ticket
+
+function createCherwellData( data ) {
+   let cherwellData = {
+      busObId: data.busObId,
+      busObPublicId: data.id,
+      busObRecId: data.recId,
+      fields: [ 
+         {
+            name: 'Tenant',
+            value: data.tenant,
+         },
+         {
+            name: 'Service',
+            value: data.classification.service
+         },
+         {
+            name: 'Category',
+            value: data.classification.category
+         },
+         {
+            name: 'Subcategory',
+            value: data.classification.subcategory
+         },
+         {
+            name: 'Status',
+            value: data.status
+         },
+         {
+            name: 'Description',
+            value: data.description.text,
+            html: data.description.html
+         },
+         {
+            name: 'OwnedByTeam',
+            value: data.team
+         },
+         {
+            name: 'OwnedBy',
+            value: data.owner.name
+         }
+      ]
+   }
+
+   return cherwellData
+}

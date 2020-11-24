@@ -16,6 +16,24 @@ module.exports = ( worker ) => ({
             }
          }
       },
+      
+      '/tickets/save': {
+         post: async ( req, res ) => {
+            try {
+               console.log('hit')
+               let data = req.body,
+               success = await worker.ticket.save( data )
+               if( success ) {
+                  res.status(200).send('ticket saved')
+               } else {
+                  res.status(400).send( 'ticket not saved' )
+               }
+            } catch( e ){
+               console.log( e )
+               res.status(500).send( 'there was an error on the server')
+            }
+         }
+      },
 
       '/tasks/:id': {
          get: async ( req, res ) => {
