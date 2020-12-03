@@ -32,6 +32,22 @@ module.exports = ( worker ) => ({
                console.log( e )
                res.status(500).send( 'there was an error on the server')
             }
+         },
+
+         put: async ( req, res ) => {
+            try {
+               console.log('put hit')
+               let data = req.body,
+               success = await worker.ticket.update( data )
+               if( success ) {
+                  res.status(200).send('ticket updated')
+               } else {
+                  res.status(400).send( 'ticket not updated' )
+               }
+            } catch( e ){
+               console.log( e )
+               res.status(500).send( 'there was an error on the server')
+            }
          }
       },
 

@@ -65,6 +65,18 @@ const _ticket = {
          return false
       }
 
+   },
+
+   async update( data ) {
+      let obj = createCherwellData( data )
+      let put = request( 'json', 'PUT', 200 )
+      let success = await put( `${ENV.domain}/s/cherwell/object/${data.type}`, obj )
+      if( success ) {
+         return true
+      } else {
+         return false
+      }
+
    }
 }
 

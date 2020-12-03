@@ -37,11 +37,11 @@ module.exports = () => ({
    async rotate() {
       return new Promise( async ( rsl, rej ) => {
          try {
-            console.log(`[radio/boot/logger] rotating logs...`)
+            console.log(`[boot/logger] rotating logs...`)
             let done = await rotateLogs()
             if( done ) {
                rotationLoop()
-               console.log('[radio/boot/logger] logs rotated')
+               console.log('[boot/logger] logs rotated')
                rsl()
             }
          } catch(e) {

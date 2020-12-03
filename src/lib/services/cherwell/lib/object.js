@@ -4,7 +4,6 @@
  * @requires module:helper.request
  * @requires module:helper.urlencode
  */
-
 let { _request, request, urlencode } = require('../../../.helper'),
 CONFIG = require('../../../.helper').CONF.cherwell,
 req_options = request.OPTS
@@ -51,7 +50,23 @@ module.exports = {
     * @param {object} obj - object to be updated
     * @return {boolean} returns true if successful
     */
-   async update( obj ) {
+   async update( name, data ) {
+      try{
+         //create the object
+         console.log( 'object update hit')
+         let object = await createObject( name, data )
+         //then save the object
+         console.log( object )
+         let result = await saveObject( object, true )
+         if( result ) {
+            return true
+         } else {
+            return false
+         }
+      } catch( e ) {
+         console.log( e )
+         return false
+      }
 
    },
 
@@ -385,30 +400,33 @@ async function createObject( name, data ) {
 async function saveObject( obj, persist ) {
    return new Promise( (rsl, rej) => {
       try {
+         console.log('save object hit')
          //set the persist value
          obj.persist = persist;
          //set the options for the request call
          let options = {
-            url: `${CONFIG.baseurl}/CherwellAPI/api/V1/savebusinessobject`,
+            url: `${CONFIG.baseurl}/api/V1/savebusinessobject`,
             method: 'POST',
             headers: {
                'Content-Type': 'application/json'
             },
             auth: {
-               bearer: this.access_token
+               bearer: CONFIG.token.access
             },
             form: obj
          };
 
          _request(options, (err, res, body) => {
-            console.log( body )
+            console.log( res )
+            let parsed = JSON.parse(body)
+            console.log( parsed )
             if( res.statusCode != 200 ) {
-               console.log(body);
-               let msg = body.Message ? body.Message : body.errorMessage;
-               rej(null);
+              
+               let msg = parsed.Message ? parsed.Message : parsed.errorMessage;
+               rsl( msg )
             }
             else {
-               rsl(body);
+               rsl(true);
             }
          });
       }

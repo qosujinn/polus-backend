@@ -1,8 +1,7 @@
 /**
  * catalog artifact
  */
-let { scripts } = require('../../.helper')
-let { Tree, TreeNode } = scripts.tree
+let { Tree, TreeNode } = require('../../.helper').scripts.tree
 
 module.exports = ( root ) => ({
    tree: new Tree( new TreeNode( root ) ),

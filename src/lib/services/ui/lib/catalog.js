@@ -16,14 +16,14 @@ const _catalog = {
             if( incidentData ) {
                let objs = incidentData['businessObjects']
                //create a tree
-               let incidentCatalog = model( 'Incident' )
+               let incidentCatalog = model( 'incident' )
                objs.forEach( subcat => {
                   //get the categorization
                   let subcategory = subcat.busObPublicId,
                   category = subcat.fields.find( el => el.name == "Service"),
                   service = subcat.fields.find( el => el.name == "ServiceClassification")
                   //add it to the tree
-                  incidentCatalog.add(service.value, 'Incident')
+                  incidentCatalog.add(service.value, 'incident')
                   incidentCatalog.add(category.value, service.value)
                   incidentCatalog.add(subcategory, category.value)
                })
@@ -38,14 +38,14 @@ const _catalog = {
             if( hrcaseData ) {
                let objs = hrcaseData['businessObjects']
 
-               let hrcaseCatalog = model( 'HRCase' )
+               let hrcaseCatalog = model( 'hrcase' )
                objs.forEach( subcat => {
                   //get the categorization
                   let subcategory = subcat.busObPublicId,
                   category = subcat.fields.find( el => el.name == "Category"),
                   service = subcat.fields.find( el => el.name == "CaseType")
                   
-                  hrcaseCatalog.add(service.value, 'HRCase')
+                  hrcaseCatalog.add(service.value, 'hrcase')
                   hrcaseCatalog.add(category.value, service.value)
                   hrcaseCatalog.add(subcategory, category.value)
                })

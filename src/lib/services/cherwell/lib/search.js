@@ -19,7 +19,6 @@ module.exports = {
 			let post = request(req_options.url, req_options.headers, 'POST', 'json', 200, 404),
 			result = post( '/api/V1/getsearchresults', options )
 			if( result ) {
-				console.log( result )
 				return result
 			} else {
 				return null

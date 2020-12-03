@@ -41,12 +41,28 @@ module.exports = ( worker ) => ({
           * @param res - the response object
           */
          post: async ( req, res ) => {
-            console.log('object post route hit')
             let name = req.params.name.toLowerCase(),
             success = await worker.object.create( name, req.body )
             if( !success ) res.status(500).send()
             else res.status(200).send()
             
+         },
+
+         /**
+          * @function post
+          * POST method for the /:object route
+          * creates an object.
+          * 
+          * @param req - the request object
+          * @param res - the response object
+          */
+         put: async ( req, res ) => {
+            console.log('cherwell put hit')
+            console.log( req.body )
+            let name = req.params.name.toLowerCase(),
+            success = await worker.object.update( name, req.body )
+            if( !success ) res.status(500).send()
+            else res.status(200).send()
          }
       },
       
@@ -213,6 +229,24 @@ module.exports = ( worker ) => ({
             res.status(200).send( req.params.id )
          }
       },
+
+      '/teams/:tenant': {
+         get: async ( req, res ) => {
+            try {
+               //get the teams from the cherwell service
+               let result = await worker.teams.get( req.params.tenant )
+               if( result ) {
+                  res.status(200).send( result )
+               } else {
+                  res.status(404).send( 'no teams exist for the tenant' )
+               }
+               //send the teams back
+            } catch( e ) {
+               console.log( e )
+               res.status(500).send( 'there was an error on the server; could not complete request' )
+            }
+         }
+      }
    },
    
    /**

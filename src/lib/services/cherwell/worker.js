@@ -3,13 +3,14 @@
  * worker for the Cherwell service
  */
 const { request, urlencode } = require('../../.helper'),
-
+env = require('../../.helper').CONF.env,
 CONFIG = require('../../.helper').CONF.cherwell
 
 //Load up libraries
 const object = require('./lib/object'),
 search = require('./lib/search'),
-user = require('./lib/user')
+user = require('./lib/user'),
+teams = require('./lib/teams')
 //get a logger
 let logger = require('../../.helper').logger()
 //get the options from the request module
@@ -21,6 +22,7 @@ options.setURL( CONFIG.baseurl )
    object: object,
    search: search,
    user: user,
+   teams: teams,
 
    async init() {
       return new Promise( (rsl, rej) => {
