@@ -7,7 +7,7 @@ user = require('./lib/user')
 
 let { request } = require('../../.helper'),
 logger = require('../../.helper').logger(),
-CONFIG = require('../../.helper').CONF
+ENV = require('../../.helper').CONF.env
 
 module.exports = () => ({
    dashboard: dashboard,
@@ -20,7 +20,31 @@ module.exports = () => ({
    async init() {
       
       return true      
-   }   
+   },
+   
+   async getTenants() {
+      try {
+         let get = request( 'json', 200 ),
+         result = await get( `${ENV.domain}/s/cherwell/object/tenant` )
+         if( result ) {
+            //loop through objects
+            let tenants = []
+            result.forEach( tenant => {
+               tenant.fields.forEach( field => {
+                  if( field.name == 'Tenant' && field.value != "" ) {
+                     tenants.push( field.value )
+                  }
+               })
+            })
+            return tenants
+         } else {
+            return null
+         }
+      } catch( e ) {
+         console.log( e )
+         return null
+      }
+   }
    
 })
 

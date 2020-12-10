@@ -59,10 +59,15 @@ module.exports = ( worker ) => ({
          put: async ( req, res ) => {
             console.log('cherwell put hit')
             console.log( req.body )
-            let name = req.params.name.toLowerCase(),
-            success = await worker.object.update( name, req.body )
-            if( !success ) res.status(500).send()
-            else res.status(200).send()
+            let name = req.params.name.toLowerCase()
+            try {
+            let success = await worker.object.update( name, req.body )
+            if( !success ) res.status(500).send(null)
+            else res.status(200).send(true)
+            } catch( e ) {
+               console.log( e )
+               res.status(404).send( e )
+            }
          }
       },
       
@@ -83,6 +88,7 @@ module.exports = ( worker ) => ({
             name = req.params.name.toLowerCase()
    
             worker.object.get( id, name ).then( data => {
+               
                res.status(200).send( data )
             }).catch( () => {
                res.status(404).send()
@@ -145,9 +151,23 @@ module.exports = ( worker ) => ({
             
             let email = await worker.object.getLatestEmail( recId, name )
             if( !email ) {
-               res.status(404).send({ statusCode: 404 })
+               res.status(404).send()
             } else {
-               res.status(200).send( { statusCode: 200, email:  email })
+               res.status(200).send(email)
+            }
+         }
+      },
+
+      '/object/:name/recId/:recId/subscribers': {
+         get: async ( req, res ) => {
+            let recId = req.params.recId,
+            name = req.params.name.toLowerCase()
+
+            let subscribers = await worker.object.getSubscribers( recId, name )
+            if( subscribers ) {
+               res.status(200).send( subscribers )
+            } else {
+               res.status(404).send()
             }
          }
       },

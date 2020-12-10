@@ -6,3 +6,6 @@
    * [Services](/features/services.md)
    * [Events](/features/events.md)
    * [Commands](/features/commands.md)
+* **[Services](services.md)**
+   * [Cherwell](/services/cherwell.md)
+   * [UI](/services/ui.md)

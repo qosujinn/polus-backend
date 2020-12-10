@@ -40,9 +40,9 @@ module.exports = ( worker ) => ({
                let data = req.body,
                success = await worker.ticket.update( data )
                if( success ) {
-                  res.status(200).send('ticket updated')
+                  res.status(200).send(true)
                } else {
-                  res.status(400).send( 'ticket not updated' )
+                  res.status(400).send( false )
                }
             } catch( e ){
                console.log( e )
@@ -131,6 +131,22 @@ module.exports = ( worker ) => ({
                if( result ) {
                   res.status(200).send( result )
                } else res.status(404).send('users not found for given team')
+            } catch( e ) {
+               console.log( e )
+               res.status(500).send( 'there was an error on the server' )
+            }
+         }
+      },
+
+      '/tenants': {
+         get: async ( req, res ) => {
+            try {
+               let result = await worker.getTenants()
+               if( result ) {
+                  res.status(200).send( result )
+               } else {
+                  res.status(404).send( 'no tenants found' )
+               }
             } catch( e ) {
                console.log( e )
                res.status(500).send( 'there was an error on the server' )

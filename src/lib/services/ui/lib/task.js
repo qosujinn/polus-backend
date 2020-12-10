@@ -9,15 +9,16 @@ const _task = {
       //create a request for the task info from cherwell
       let get = request('json'),
       result = await get(`${ENV.domain}/s/cherwell/object/task/publicId/${id}`)
-      
-      if( result.statusCode !== 200 ) { return null }
-      else {
+      console.log( 'task received' )
+      console.log( result )
+      if( result) {
          //create a ticket, then parse the cherwell data and add it
-         let task = model( result.data.busObPublicId )
-         .parse( 'cherwell', result.data )
+         let task = model( result.busObPublicId )
+         .parse( 'cherwell', result )
          
          return task
-
+      } else {
+         return null
       }
    },
 

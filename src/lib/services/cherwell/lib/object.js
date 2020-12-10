@@ -88,7 +88,6 @@ module.exports = {
             let get = request( req_options.url, req_options.headers, 'json', 200)
             let path = `/api/V1/getbusinessobject/busobid/${objid}/publicid/${id}` 
             get( path ).then( result => {
-               console.log( result )
                rsl( result )
             }).catch( e => {
                rej( e )
@@ -141,7 +140,7 @@ module.exports = {
          let relation = schema['relationships'].find( rel => rel['displayName'] == options['displayName'] )
 
          options['relationshipId'] = relation['relationshipId']
-         console.log('getRelated: here')
+         
          let objs = await getRelatedObjects( recId, name, options )
          if ( !objs ) { return null }
          else {
@@ -180,6 +179,25 @@ module.exports = {
          //the first entry will be the latest email
          let latest = journals.shift()
          return latest
+      }
+   },
+
+   async getSubscribers( recId, name ) {
+      let relation
+      switch( name ) {
+         case 'incident':
+            relation = 'Incident has Subscribers'
+            break
+         
+         case 'hrcase':
+            relation = 'HR Case has Subscribers'
+            break
+      }
+      let subscribers = await this.getRelated( recId, name, { displayName: relation } )
+      if( !subscribers ) {
+         return null 
+      } else {
+         return subscribers
       }
    },
 
@@ -417,13 +435,12 @@ async function saveObject( obj, persist ) {
          };
 
          _request(options, (err, res, body) => {
-            console.log( res )
             let parsed = JSON.parse(body)
-            console.log( parsed )
+            
             if( res.statusCode != 200 ) {
-              
+               console.log( res.body )
                let msg = parsed.Message ? parsed.Message : parsed.errorMessage;
-               rsl( msg )
+               rej( msg )
             }
             else {
                rsl(true);

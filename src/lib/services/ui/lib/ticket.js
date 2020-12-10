@@ -1,5 +1,3 @@
-const { truncate } = require('lodash')
-
 const ENV = require('../../../.helper').CONF.env
 
 let { request } = require('../../../.helper'),
@@ -12,7 +10,7 @@ const _ticket = {
       try{
          console.log('[ticket.js] hit')
          //create a request for the ticket info from cherwell
-         let get = request('json', 200, 404)
+         let get = request('json', 200)
          
          //check for the ticket by trying each type
          for( let i = 0; i <= TYPE.length - 1; i++ ) {
@@ -25,21 +23,48 @@ const _ticket = {
                //set the type of ticket
                ticket.set( { type: TYPE[i] })
                //get the latest email for the ticket
-               result = await get(`${ENV.domain}/s/cherwell/object/${TYPE[i]}/recId/${ticket.recId}/email`)
-               if( result.statusCode == 200 ) { 
-                  //get the Details field from the result
-                  let details
-                  result['email'].fields.forEach( field => {
-                     if( field.name == "Details" ) { details = field }
-                  })
-                  
-                  //put them in the email object
-                  let email = {
-                     text: details.value,
-                     html: details.html
+               try{
+                  result = await get(`${ENV.domain}/s/cherwell/object/${TYPE[i]}/recId/${ticket.recId}/email`)
+                  if( result ) { 
+                     //get the Details field from the result
+                     let details
+                     result.fields.forEach( field => {
+                        if( field.name == "Details" ) { details = field }
+                     })
+                     
+                     //put them in the email object
+                     let email = {
+                        text: details.value,
+                        html: details.html
+                     }
+                     //set the ticket's email object
+                     ticket.set( { email: email } )
                   }
-                  //set the ticket's email object
-                  ticket.set( { email: email } )
+               } catch( e ) {
+                  if( e.statusCode == 404 ) {
+                     console.log( 'no emails' )
+                  }
+               }
+               //get the subscibers for the ticket
+               try {
+                  result = await get( `${ENV.domain}/s/cherwell/object/${TYPE[i]}/recId/${ticket.recId}/subscribers` )
+                  if( result ) {
+                     let subscribers = ''
+                     //loop through, get emails
+                     result.forEach( sub => {
+                        sub.fields.forEach( field => {
+                           if( field.name == 'SubscriberEmail' ) {
+                              subscribers += `${field.value}; `
+                           }
+                        })
+                     })
+                     //set to ticket
+                     ticket.set( { subscribers: subscribers } )
+                  }
+               } catch( e ) {
+                  if( e.statusCode == 404 ) { 
+                     console.log( 'no subscribers found' )
+                  }
                }
                //return when done
                return ticket
@@ -70,11 +95,16 @@ const _ticket = {
    async update( data ) {
       let obj = createCherwellData( data )
       let put = request( 'json', 'PUT', 200 )
-      let success = await put( `${ENV.domain}/s/cherwell/object/${data.type}`, obj )
-      if( success ) {
-         return true
-      } else {
-         return false
+      try{
+         let success = await put( `${ENV.domain}/s/cherwell/object/${data.type}`, obj )
+         if( success ) {
+            return success
+         } else {
+            return false
+         }
+      } catch( e ) {
+         console.log( e )
+         return e
       }
 
    }
@@ -120,6 +150,22 @@ function createCherwellData( data ) {
          {
             name: 'OwnedBy',
             value: data.owner.name
+         },
+         {
+            name: 'OwnedByEmail',
+            value: data.owner.email
+         },
+         {
+            name: 'CustomerDisplayName',
+            value: data.requestor.name
+         },
+         {
+            name: 'CustomerEmail',
+            value: data.requestor.email
+         },
+         {
+            name: 'Priority',
+            value: data.priority
          }
       ]
    }
