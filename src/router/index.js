@@ -4,7 +4,7 @@ session = require('express-session'),
 SAML = require('passport-saml').Strategy
 
 const { env, shibb } = require('../../config')
-const { fs } = require('../helper')
+const { fs, path } = require('../helper')
 
 let strategy = new SAML(
    {
@@ -54,9 +54,11 @@ expr.get('/s/shibboleth/fail', ( req, res ) => {
    res.status(401).send('login failed')
 })
 
-expr.get('/s/shibboleth/metadata', ( req, res ) => {
+expr.get('/shibb.metadata', ( req, res ) => {
+   let file = fs.readFileSync( shibb.cert_sp, 'utf-8')
+   console.log( file )
    res.type('application/xml')
-   res.status(200).send( strategy.generateServiceProviderMetadata(fs.readFileSync( shibb.cert_sp, 'utf-8')) )
+   res.status(200).send( strategy.generateServiceProviderMetadata( fs.readFileSync(shibb.key_sp, 'utf-8'), fs.readFileSync(shibb.cert_sp, 'utf-8') ) )
 })
 
 module.exports = expr

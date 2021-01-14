@@ -57,7 +57,7 @@
 			"text": "Event description:"
 		},
 		{
-			"type": "text",
+			"type": "date",
 			"text": "Event date/s:"
 		},
 		{
@@ -73,7 +73,7 @@
 			"text": "Event location/s:"
 		},
 		{
-			"type": "text",
+			"type": "number",
 			"text": "Number of guests:"
 		},
 		{
@@ -85,7 +85,7 @@
 			"text": "Budget estimate:"
 		},
 		{
-			"type": "text",
+			"type": "number",
 			"text": "Cost center #:"
 		},
 		{
@@ -225,7 +225,7 @@
 			"options": ["Yes", "No"],
 			"subqueries": [
 				{
-					"type": "text",
+					"type": "number",
 					"text": "How many passes"
 				}
 			]

@@ -1,3 +1,5 @@
+const object = require('../../cherwell/lib/object')
+
 const ENV = require('../../../.helper').CONF.env
 
 let { request } = require('../../../.helper'),
@@ -49,14 +51,23 @@ const _ticket = {
                try {
                   result = await get( `${ENV.domain}/s/cherwell/object/${TYPE[i]}/recId/${ticket.recId}/subscribers` )
                   if( result ) {
-                     let subscribers = ''
+                     let subscribers = []
                      //loop through, get emails
                      result.forEach( sub => {
+                        let obj = {
+                           name: '',
+                           email: ''
+                        }
                         sub.fields.forEach( field => {
                            if( field.name == 'SubscriberEmail' ) {
-                              subscribers += `${field.value}; `
+                              obj.email = field.value
+                           }
+                           if( field.name == 'CustomerName' ) {
+                              obj.name = field.value
                            }
                         })
+
+                        subscribers.push( obj )
                      })
                      //set to ticket
                      ticket.set( { subscribers: subscribers } )
@@ -81,6 +92,12 @@ const _ticket = {
    },
 
    async save( data ) {
+      if( data.subscribers ) {
+         let result = await createSubscribers( data )
+         if( !result ) {
+            return false
+         }
+      }
       let obj = createCherwellData( data )
       let post = request( 'json', 'POST', 200 )
       let success = await post( `${ENV.domain}/s/cherwell/object/${data.type}`, obj )
@@ -92,7 +109,14 @@ const _ticket = {
 
    },
 
-   async update( data ) {
+   async update( data ) { 
+      
+      if( data.subscribers ) {
+      let result = await createSubscribers( data )
+      if( !result ) {
+         return false
+      }
+   }
       let obj = createCherwellData( data )
       let put = request( 'json', 'PUT', 200 )
       try{
@@ -111,6 +135,77 @@ const _ticket = {
 }
 
 module.exports = _ticket
+
+async function createSubscribers( data ) {
+   console.log( 'creating subscribers...' )
+   //get the object schema and the subscriber summary and template
+   let get = request( 'json', 200 )
+   let schema = await get( `${ENV.domain}/s/cherwell/object/schema/${data.type}` ),
+   summary = await get( `${ENV.domain}/s/cherwell/object/summary/subscriber` ),
+   template = await get( `${ENV.domain}/s/cherwell/object/template/subscriber` )
+
+   if( schema && summary && template ) {
+
+      let subs = []
+      //get the display name for the relationship
+      let displayName
+      switch( data.type ) {
+         case 'incident':
+            displayName = 'Incident has Subscribers'
+            break
+         
+         case 'hrcase':
+            displayName = 'HR Case has Subscribers'
+            break
+      }
+      //get the busObId and relationship ID
+      let objId = summary.busObId
+      let relation = schema['relationships'].find( rel => rel['displayName'] == displayName ),
+      relationshipId = relation['relationshipId']
+      //create the subscriber objects
+      data.subscribers.forEach( sub => {
+         if( sub.name == 'new' ) {
+            let fields = template.fields
+            fields.forEach( field => {
+               if( field.name == 'CustomerName' ) {
+                  field.dirty = true
+                  field.value = 'CC'
+               }
+
+               if( field.name == 'SubscriberEmail' ) {
+                  console.log( sub.email )
+                  field.dirty = true
+                  field.value = sub.email
+               }
+            })
+            let obj = {
+               parentBusObId: data.busObId,
+               parentBusObPublicId: data.id,
+               parentBusObRecId: data.recId,
+               relationshipId: relationshipId,
+               busObId: objId,
+               fields: fields,
+               persist: true
+
+            }
+            subs.push( obj ) 
+         }
+      })
+      console.log( subs )
+      //make the batch save request
+      let post = request( 'json', 'POST', 200),
+      result = await post( `${ENV.domain}/s/cherwell/objectbatch`, subs )
+      if( result ) {
+         console.log( 'subscribers saved')
+         return true
+      } else {
+         console.log( 'subscribers not saved')
+         return false
+      }
+   } else {
+      return null
+   }
+}
 
 function createCherwellData( data ) {
    let cherwellData = {

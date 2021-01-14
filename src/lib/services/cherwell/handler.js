@@ -70,6 +70,74 @@ module.exports = ( worker ) => ({
             }
          }
       },
+
+      '/objectbatch': {
+         post: async ( req, res ) => {
+            try{
+               let result = await worker.object.saveBatch( req.body )
+               if( result ) {
+                  res.status( 200 ).send( result )
+               } else {
+                  res.status(400).send( 'there was an error' )
+               }
+            } catch( e ) {
+               console.log( e )
+               res.status(500).send( `couldn't complete batch save` )
+            }
+         }
+      },
+
+      '/object/template/:name': {
+         get: async ( req, res ) => {
+            let name = req.params.name
+            try {
+               let template = await worker.object.getTemplate( name )
+               if( template ) {
+                  res.status( 200 ).send( template )
+               } else {
+                  res.status( 404 ).send( `template for object ${name} not found` )
+               }
+            } catch( e ) {
+               console.log( e )
+               res.status( 500 ).send( `couldn't complete request for template`)
+            }
+         }
+      },
+
+      '/object/summary/:name': {
+         get: async ( req, res ) => {
+            let name = req.params.name
+            try {
+               let summary = await worker.object.getSummary( name )
+               if( summary ) {
+                  res.status(200).send( summary )
+               } else {
+                  res.status(404).send( `summary for object ${name} not found` )
+               }
+            } catch( e ) { 
+               console.log( e )
+               res.status( 500 ).send( `couldn't complete request for summary` )
+            }
+         }
+      },
+
+      '/object/schema/:name': {
+         get: async ( req, res ) => {
+            console.log('hit')
+            let name = req.params.name
+            try {
+               let schema = await worker.object.getSchema( name )
+               if( schema ) {
+                  res.status(200).send( schema )
+               } else {
+                  res.status(404).send( `schema for object ${name} not found` )
+               }
+            } catch( e ) { 
+               console.log( e )
+               res.status( 500 ).send( `couldn't complete request for schema` )
+            }
+         }
+      },
       
       /**
        * /:object/:id

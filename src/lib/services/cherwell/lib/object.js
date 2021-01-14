@@ -233,6 +233,72 @@ module.exports = {
          return null
       }
 
+   },
+
+   async getTemplate( name ) {
+      try {
+         let objId = await getObjectId( name )
+         let template = await getObjectTemplate( objId )
+         if( template ) {
+            return template
+         } else return null
+      } catch( e ) {
+         console.log( e )
+         return null
+      }
+   },
+   
+   async getSummary( name ) {
+      try {
+         let summary = await getObjectSummary( name )
+         if( summary ) {
+            return summary
+         } else return null
+      } catch( e ) {
+         console.log( e )
+         return null
+      }
+   },
+
+   async getSchema( name ) {
+      try {
+         let schema = await getObjectSchema( name )
+         if( schema ) {
+            return schema
+         } else {
+            return null
+         }
+      } catch( e ) {
+         console.log( e )
+         return null
+      }
+   },
+
+   async saveBatch( objs, stopOnError = false ) {
+      //create headers
+      req_options.setHeaders( {
+         'api-key': CONFIG.client_id,
+         'Authorization': `Bearer ${CONFIG.token.access}`
+      })
+      //create the body for the batch save
+      let body = {
+         saveRequests: objs,
+         stopOnError: stopOnError
+      }
+      try {
+   
+         let post = request(req_options.url, req_options.headers, 'POST', 'json', 200),
+         result = await post( `/api/V1/savebusinessobjectbatch`, body)
+         if( result ) {
+            console.log('batch save done')
+            console.log( result )
+            return result
+         }
+      } catch( e ) {
+         console.log('batch save error')
+         console.log( e )
+         return null
+      }
    }
 }
 
@@ -264,6 +330,31 @@ async function getObjectId( name ) {
          }
 
    })
+}
+
+/**
+ * @summary gets the object summary by name
+ * @param {string} name - the name of the object
+ * @return {object} the object's summary
+ */
+async function getObjectSummary( name ) {
+   try {
+      req_options.setHeaders( {
+         'api-key': CONFIG.client_id,
+         'Authorization': `Bearer ${CONFIG.token.access}`
+      })
+
+      let get = request( req_options.url, req_options.headers, 'json', 200),
+      result = await get(`/api/V1/getbusinessobjectsummary/busobname/${name}`)
+      if( result === [] ) {
+         return null
+      } else {
+         return result[0]
+      }
+   } catch( e ) {
+      console.log( e )
+      return null
+   }
 }
 
 /**
@@ -303,7 +394,7 @@ async function getObjectTemplate( busObId, required = false, fields = [] ) {
  * @param {boolean} include - include relationships for the object
  * @return {object} business object schema
  */
-async function getObjectSchema( name, include ) { 
+async function getObjectSchema( name, include = true ) { 
    try{
       req_options.setHeaders( {
          'api-key': CONFIG.client_id,
