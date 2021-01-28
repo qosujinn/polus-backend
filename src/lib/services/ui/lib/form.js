@@ -17,11 +17,11 @@ const _form = {
      //create a post request for the ticket creation
      post = request(ENV.domain, 'POST', 'json', 200)
       
-     let result = await post(`/s/cherwell/object/${form.type}`, form)
+     let result = await post(`/s/cherwell/object/incident`, form)
      if( result ) {
-        res.status(200).send(true)
+        return true
      } else {
-        res.status(200).send(null)
+        return null
      }
 
    }
@@ -64,7 +64,7 @@ function processFormData( data ) {
             }
          });
          //once all of the queries have been processed, add the form string to the Description and the classifications
-         data.fields.push({ name: `${ data.type == "HRCase" ? 'CaseType' : 'Service' }`, value: data.service }, 
+         data.fields.push({ name: 'Service', value: data.service }, 
             { name: "Category", value: data.category }, 
             { name: "Subcategory", value: data.subcategory },
             { name: 'Tenant', value: data.tenant });
@@ -80,7 +80,7 @@ function processFormData( data ) {
          if(!shortdesc) {
             data.fields.push({ name: 'ShortDescription', value: data.title });
          }
-
+         console.log( data )
          return data
       }
 

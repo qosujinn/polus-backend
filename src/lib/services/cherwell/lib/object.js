@@ -31,6 +31,7 @@ module.exports = {
       try{
          //create the object
          let object = await createObject( name, data )
+         console.log(object)
          //then save the object
          let result = await saveObject( object, true )
          if( result ) {
@@ -68,6 +69,44 @@ module.exports = {
          return false
       }
 
+   },
+
+   async saveRelatedObject( data ) {
+      console.log( data )
+      return new Promise( (rsl, rej) => {
+         try {
+            //set the options for the request call
+            let options = {
+               url: `${CONFIG.baseurl}/api/V1/saverelatedbusinessobject`,
+               method: 'POST',
+               headers: {
+                  'Content-Type': 'application/json'
+               },
+               auth: {
+                  bearer: CONFIG.token.access
+               },
+               form: data
+            };
+   
+            _request(options, (err, res, body) => {
+               let parsed = JSON.parse(body)
+               
+               if( res.statusCode != 200 ) {
+                  console.log( res.body )
+                  let msg = parsed.Message ? parsed.Message : parsed.errorMessage;
+                  rej( msg )
+               }
+               else {
+                  console.log( res.body )
+                  rsl(true);
+               }
+            });
+         }
+         catch(error) {
+            console.log('error: \n', error);
+            rej(null);
+         }
+      })
    },
 
    /**
@@ -470,10 +509,10 @@ async function createObject( name, data ) {
          
             let obj = { 
                busObId: objId,
-               busObPublicId: data.busObPublicId,
-               busObRecId: data.busObRecId,
                fields: []
-            };
+            }
+            if( data.busObPublicId ) { obj.busObPublicId = data.busObPublicId }
+            if( data.busObRecId ) { obj.busObRecId = data.busObRecId }
             //then set the field values from the data
             template.fields.forEach(field =>  {
                data.fields.forEach(item => {
@@ -481,7 +520,8 @@ async function createObject( name, data ) {
                      //insert the value, and set dirty to true
                      if(item.name == "Description") { field.html = item.html; }
                      field.value = item.value;
-                     field.dirty = true;
+                     if(item.name != "ShortDescription")
+                     { field.dirty = true; }
                      //add field to object array
                      obj.fields.push(field);
                   }
@@ -534,6 +574,7 @@ async function saveObject( obj, persist ) {
                rej( msg )
             }
             else {
+               console.log( res.body )
                rsl(true);
             }
          });

@@ -27,6 +27,7 @@ files.forEach( file => {
          //add them to forms object
          forms.defaults.push(form);
          logger.log( 'boot', `[boot/lib/models] -->> form added to defaults: ${form.name}`.green);
+         console.log(`[boot/lib/models] -->> form added to defaults: ${form.name}`.green)
 
       } else {
          
@@ -38,6 +39,7 @@ files.forEach( file => {
          }
 
          forms[form.tenant][form.service].push( form );
+         console.log(`[boot/lib/models] -->> form added to ${form.tenant}/${form.service}: ${form.name} (${form.category} > ${form.subcategory})`.green)
          logger.log( `boot`, `[boot/lib/models] -->> form added to ${form.tenant}/${form.service}: ${form.name} (${form.category} > ${form.subcategory})`.green);
       }
    })

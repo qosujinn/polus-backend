@@ -43,8 +43,8 @@ module.exports = ( worker ) => ({
          post: async ( req, res ) => {
             let name = req.params.name.toLowerCase(),
             success = await worker.object.create( name, req.body )
-            if( !success ) res.status(500).send()
-            else res.status(200).send()
+            if( !success ) res.status(500).send(false)
+            else res.status(200).send(true)
             
          },
 
@@ -68,6 +68,15 @@ module.exports = ( worker ) => ({
                console.log( e )
                res.status(404).send( e )
             }
+         }
+      },
+
+      '/related/save': {
+         post: async ( req, res ) => {
+            console.log('related hit')
+            let success = await worker.object.saveRelatedObject( req.body )
+            if( !success ) res.status(500).send(false)
+            else res.status(200).send(true)
          }
       },
 
@@ -285,10 +294,8 @@ module.exports = ( worker ) => ({
          
                let result = await worker.search.getSearchResults( body )
                if( result ) {
-                  console.log('result success')
                   res.status(200).send( result )         
                } else {
-                  console.log('result false ')
                   res.status(404).send( 'no results for the search' )
                }
             } catch( e ) {

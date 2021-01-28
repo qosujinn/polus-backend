@@ -17,11 +17,12 @@ const _ticket = {
          //check for the ticket by trying each type
          for( let i = 0; i <= TYPE.length - 1; i++ ) {
             let result = await get(`${ENV.domain}/s/cherwell/object/${TYPE[i]}/publicId/${id}`)
-            console.log( result )
+            
             if( result ) {
                //create a ticket, then parse the cherwell data and add it
                let ticket = model( result.busObPublicId )
                .parse( 'cherwell', result )
+               console.log( ticket )
                //set the type of ticket
                ticket.set( { type: TYPE[i] })
                //get the latest email for the ticket
@@ -54,6 +55,7 @@ const _ticket = {
                      let subscribers = []
                      //loop through, get emails
                      result.forEach( sub => {
+                        console.log( sub )
                         let obj = {
                            name: '',
                            email: ''
@@ -68,6 +70,7 @@ const _ticket = {
                         })
 
                         subscribers.push( obj )
+                        console.log( subscribers )
                      })
                      //set to ticket
                      ticket.set( { subscribers: subscribers } )
@@ -100,7 +103,7 @@ const _ticket = {
       }
       let obj = createCherwellData( data )
       let post = request( 'json', 'POST', 200 )
-      let success = await post( `${ENV.domain}/s/cherwell/object/${data.type}`, obj )
+      let success = await post( `${ENV.domain}/s/cherwell/object/incident`, obj )
       if( success ) {
          return true
       } else {
@@ -110,7 +113,8 @@ const _ticket = {
    },
 
    async update( data ) { 
-      
+      console.log('update hit')
+      console.log( data )
       if( data.subscribers ) {
       let result = await createSubscribers( data )
       if( !result ) {
@@ -120,7 +124,7 @@ const _ticket = {
       let obj = createCherwellData( data )
       let put = request( 'json', 'PUT', 200 )
       try{
-         let success = await put( `${ENV.domain}/s/cherwell/object/${data.type}`, obj )
+         let success = await put( `${ENV.domain}/s/cherwell/object/incident`, obj )
          if( success ) {
             return success
          } else {
@@ -147,35 +151,38 @@ async function createSubscribers( data ) {
    if( schema && summary && template ) {
 
       let subs = []
-      //get the display name for the relationship
-      let displayName
-      switch( data.type ) {
-         case 'incident':
-            displayName = 'Incident has Subscribers'
-            break
-         
-         case 'hrcase':
-            displayName = 'HR Case has Subscribers'
-            break
-      }
+    
       //get the busObId and relationship ID
       let objId = summary.busObId
-      let relation = schema['relationships'].find( rel => rel['displayName'] == displayName ),
+      console.log( objId )
+      let relation = schema['relationships'].find( rel => rel['displayName'] == "Incident has Subscribers" ),
       relationshipId = relation['relationshipId']
       //create the subscriber objects
-      data.subscribers.forEach( sub => {
+      data.subscribers.forEach( async sub => {
          if( sub.name == 'new' ) {
             let fields = template.fields
             fields.forEach( field => {
-               if( field.name == 'CustomerName' ) {
-                  field.dirty = true
-                  field.value = 'CC'
-               }
+               switch( field.name ) {
+                  case 'CustomerName':
+                     field.dirty = true
+                     field.value = 'CC'
+                     break
 
-               if( field.name == 'SubscriberEmail' ) {
-                  console.log( sub.email )
-                  field.dirty = true
-                  field.value = sub.email
+                  case 'SubscriberEmail':
+                     field.dirty = true
+                     field.value = sub.email
+                     break
+
+                  case 'IncidentRecID':
+                     field.value = data.recId
+                     break
+
+                  case 'IncidentID':
+                     field.value = data.id
+                     break
+
+                  default:
+                     break
                }
             })
             let obj = {
@@ -188,20 +195,36 @@ async function createSubscribers( data ) {
                persist: true
 
             }
-            subs.push( obj ) 
+            //subs.push( obj )
+            try {
+               let post = request( 'json', 'POST', 200),
+               result = await post( `${ENV.domain}/s/cherwell/object/subscriber`, obj )
+               // await post( `${ENV.domain}/s/cherwell/related/save`, obj )
+               if( result ) {
+
+                  console.log( 'subscriber saved')
+                  console.log( result )
+               } else {
+                  console.log( 'subscriber not saved')
+               }
+            } catch( e ) {
+               console.log( e )
+            }
          }
       })
-      console.log( subs )
-      //make the batch save request
-      let post = request( 'json', 'POST', 200),
-      result = await post( `${ENV.domain}/s/cherwell/objectbatch`, subs )
-      if( result ) {
-         console.log( 'subscribers saved')
-         return true
-      } else {
-         console.log( 'subscribers not saved')
-         return false
-      }
+      // console.log( subs )
+      // //make the batch save request
+      // let post = request( 'json', 'POST', 200)
+      // subs.forEach( async sub => {
+      //    let result = await post( `${ENV.domain}/s/cherwell/object/subscriber`, sub )
+      //    if( result ) {
+      //       console.log( 'subscriber saved')
+      //    } else {
+      //       console.log( 'subscriber not saved')
+      //    }
+      // })
+
+      return true
    } else {
       return null
    }
@@ -235,8 +258,7 @@ function createCherwellData( data ) {
          },
          {
             name: 'Description',
-            value: data.description.text,
-            html: data.description.html
+            value: data.description.html
          },
          {
             name: 'OwnedByTeam',

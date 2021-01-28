@@ -11,7 +11,6 @@ module.exports = {
 
 	async getSearchResults( options ) {
 		try { 
-			console.log('search; hit')
 			req_options.setHeaders( {
 				'api-key': CONFIG.client_id,
 				'Authorization': `Bearer ${CONFIG.token.access}`

@@ -109,9 +109,11 @@ module.exports = ( worker ) => ({
       '/forms/submit': {
          post: async( req, res ) => {
             try {
+               console.log('forms/submit hit')
                let data = req.body,
                result = await worker.form.submit( data )
                if( result ) {
+                  console.log('form submitted')
                   res.status(200).send(true)
                } else {
                   res.status(404).send(null)
