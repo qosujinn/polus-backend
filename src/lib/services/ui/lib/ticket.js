@@ -186,44 +186,30 @@ async function createSubscribers( data ) {
                }
             })
             let obj = {
-               parentBusObId: data.busObId,
-               parentBusObPublicId: data.id,
-               parentBusObRecId: data.recId,
-               relationshipId: relationshipId,
                busObId: objId,
                fields: fields,
                persist: true
 
             }
-            //subs.push( obj )
+
+            
             try {
                let post = request( 'json', 'POST', 200),
                result = await post( `${ENV.domain}/s/cherwell/object/subscriber`, obj )
                // await post( `${ENV.domain}/s/cherwell/related/save`, obj )
                if( result ) {
 
-                  console.log( 'subscriber saved')
+                  console.log( 'subscribers saved')
                   console.log( result )
                } else {
-                  console.log( 'subscriber not saved')
+                  console.log( 'subscribers not saved')
                }
             } catch( e ) {
                console.log( e )
             }
          }
-      })
-      // console.log( subs )
-      // //make the batch save request
-      // let post = request( 'json', 'POST', 200)
-      // subs.forEach( async sub => {
-      //    let result = await post( `${ENV.domain}/s/cherwell/object/subscriber`, sub )
-      //    if( result ) {
-      //       console.log( 'subscriber saved')
-      //    } else {
-      //       console.log( 'subscriber not saved')
-      //    }
-      // })
 
+      })
       return true
    } else {
       return null
