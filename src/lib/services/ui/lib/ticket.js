@@ -105,6 +105,7 @@ const _ticket = {
       let post = request( 'json', 'POST', 200 )
       let success = await post( `${ENV.domain}/s/cherwell/object/incident`, obj )
       if( success ) {
+         console.log( success )
          return true
       } else {
          return false
@@ -122,13 +123,14 @@ const _ticket = {
       }
    }
       let obj = createCherwellData( data )
-      let put = request( 'json', 'PUT', 200 )
+      let put = request( 'json', 'PUT', 200, 500, 404 )
       try{
-         let success = await put( `${ENV.domain}/s/cherwell/object/incident`, obj )
-         if( success ) {
-            return success
+         let result = await put( `${ENV.domain}/s/cherwell/object/incident`, obj )
+         if( result.err ) {
+            console.log( result )
+            return result
          } else {
-            return false
+            return true
          }
       } catch( e ) {
          console.log( e )

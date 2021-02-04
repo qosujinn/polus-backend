@@ -41,7 +41,7 @@ module.exports = {
          }
       } catch( e ) {
          console.log( e )
-         return false
+         return e
       }
 
    },
@@ -59,14 +59,16 @@ module.exports = {
          //then save the object
          console.log( object )
          let result = await saveObject( object, true )
+         
          if( result ) {
+            
             return true
          } else {
+            
             return false
          }
       } catch( e ) {
-         console.log( e )
-         return false
+         return { err: e }
       }
 
    },

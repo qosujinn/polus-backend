@@ -39,10 +39,10 @@ module.exports = ( worker ) => ({
                console.log('put hit')
                let data = req.body,
                success = await worker.ticket.update( data )
-               if( success ) {
-                  res.status(200).send(true)
+               if( success.err ) {
+                  res.status(500).send(success)
                } else {
-                  res.status(400).send( false )
+                  res.status(200).send( true )
                }
             } catch( e ){
                console.log( e )

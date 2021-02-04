@@ -62,7 +62,8 @@ module.exports = ( worker ) => ({
             let name = req.params.name.toLowerCase()
             try {
             let success = await worker.object.update( name, req.body )
-            if( !success ) res.status(500).send(null)
+            console.log( success )
+            if( success.err ) res.status(500).send( { err: success.err } )
             else res.status(200).send(true)
             } catch( e ) {
                console.log( e )
